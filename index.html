@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aprovação PRF — Policial Rodoviário Federal</title>
+<!-- ============================================================
+  TEMPLATE DE CURSINHO DE CONCURSO (motor reutilizável)
+  Para montar um novo concurso, troque:
+   1) window.DMAE_SLUG (identificador único do concurso no backend)  — script no <head>
+   2) <title>, marca do cabeçalho, hero (eyebrow/h1/sub) e a data da prova (var prova=)
+   3) Ficha técnica (#ficha), edital verticalizado (#portugues...#legislacao) e alertas
+   4) Domínio por prioridade (#dominio): os cards Aprenda→Entenda→Na prova
+   5) Conteúdo em JS: arrays SIM, SIM2, SIM3, SIM4 (simulados), TREINOS, FC (flashcards)
+   6) Cronograma (#plano) com as datas do concurso
+  O motor (login Supabase compartilhado, caderno de erros, desempenho, sync, cronômetro)
+  NÃO precisa ser alterado. O conteúdo atual é EXEMPLO (DMAE) — substitua pelo seu concurso.
+============================================================ -->
+<meta name="description" content="Cursinho completo para Policial Rodoviário Federal (PRF), banca Cebraspe: edital verticalizado com pegadinhas, aulas do zero, plano de estudos com horas por dia, simulados Certo/Errado e flashcards.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+  /* ===== Tema: água/saneamento (DMAE). Azul institucional + verde "tratada".
+     Claro por padrão; escuro via prefers-color-scheme e [data-theme]. ===== */
+  :root{
+    --bg:#eef3f6; --paper:#ffffff; --paper-2:#f4f8fa;
+    --ink:#122430; --ink-2:#3a5361; --muted:#647d8b; --line:#d7e2e8; --line-2:#e6eef2;
+    --blue:#0d5c86; --blue-2:#1785bf; --blue-soft:#e2f0f8;
+    --teal:#0e8f9c; --green:#1a8f4c; --green-soft:#e3f5ea;
+    --amber:#b45309; --amber-soft:#fbeede; --red:#c0392b; --red-soft:#fbe7e4;
+    --shadow:0 1px 2px rgba(18,36,48,.06),0 8px 24px rgba(18,36,48,.06);
+    --wrongbg:#fbe7e4; --rightbg:#e3f5ea;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0b1418; --paper:#0f1b21; --paper-2:#132430;
+    --ink:#e7eef2; --ink-2:#b3c4cd; --muted:#8399a4; --line:#22343d; --line-2:#1a2a32;
+    --blue:#3ea6dd; --blue-2:#57b6e8; --blue-soft:#12303f;
+    --teal:#2bb6c2; --green:#43c07e; --green-soft:#123026;
+    --amber:#e0a45c; --amber-soft:#2e2410; --red:#e8796c; --red-soft:#2e1613;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+    --wrongbg:#2e1613; --rightbg:#123026;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0b1418; --paper:#0f1b21; --paper-2:#132430;
+    --ink:#e7eef2; --ink-2:#b3c4cd; --muted:#8399a4; --line:#22343d; --line-2:#1a2a32;
+    --blue:#3ea6dd; --blue-2:#57b6e8; --blue-soft:#12303f;
+    --teal:#2bb6c2; --green:#43c07e; --green-soft:#123026;
+    --amber:#e0a45c; --amber-soft:#2e2410; --red:#e8796c; --red-soft:#2e1613;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+    --wrongbg:#2e1613; --rightbg:#123026;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:70px;overflow-x:clip}
+  body{overflow-x:clip}
+  img,table,pre,.tw{max-width:100%}
+  /* impede que textos longos (URLs, código) estourem a largura no celular */
+  p,li,td,th,dd,dt,h1,h2,h3,h4,span,a,b,strong,em,label{overflow-wrap:break-word}
+  code{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Public Sans",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:"Lora",Georgia,serif;line-height:1.2;text-wrap:balance}
+  a{color:var(--blue)}
+  .serif{font-family:"Lora",Georgia,serif}
+
+  /* topbar */
+  .top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .top .in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 18px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.01em}
+  .brand .drop{width:26px;height:26px;border-radius:50% 50% 50% 8px;transform:rotate(45deg);background:linear-gradient(135deg,var(--blue-2),var(--teal));box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
+  .brand b{color:var(--blue)}
+  .top .sp{flex:1}
+  .cd{font-size:12.5px;color:var(--ink-2);font-weight:600;border:1px solid var(--line);border-radius:999px;padding:5px 11px;white-space:nowrap}
+  .cd b{color:var(--red);font-variant-numeric:tabular-nums}
+  .tbtn{border:1px solid var(--line);background:var(--paper);color:var(--ink-2);border-radius:9px;padding:6px 9px;cursor:pointer;font-size:14px}
+  .menub{display:none}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 18px;display:grid;grid-template-columns:236px 1fr;gap:30px;align-items:start}
+  /* TOC */
+  nav.toc{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);overflow:auto;padding:18px 0 40px;font-size:14px}
+  nav.toc a{display:block;color:var(--ink-2);text-decoration:none;padding:6px 10px;border-radius:7px;border-left:2px solid transparent}
+  nav.toc a:hover{background:var(--paper-2);color:var(--ink)}
+  nav.toc a.on{color:var(--blue);border-left-color:var(--blue);background:var(--blue-soft);font-weight:600}
+  nav.toc .grp{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:16px 10px 4px;font-weight:700}
+  main{min-width:0;padding-bottom:80px}
+
+  section{scroll-margin-top:70px;margin:34px 0}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 24px;box-shadow:var(--shadow)}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:0 0 6px}
+  h2.sec{font-size:clamp(22px,3.2vw,30px);margin:0 0 14px;color:var(--ink);border-bottom:2px solid var(--blue);padding-bottom:8px;display:inline-block}
+  h3{font-size:19px;margin:22px 0 8px;color:var(--blue)}
+  h4{font-size:15.5px;margin:16px 0 6px}
+  p{margin:0 0 12px;max-width:72ch}
+  ul,ol{margin:0 0 12px;padding-left:22px}
+  li{margin:5px 0;max-width:72ch}
+  strong{color:var(--ink)}
+  .lead{font-size:17px;color:var(--ink-2)}
+  code{background:var(--paper-2);border:1px solid var(--line-2);border-radius:5px;padding:1px 5px;font-size:.9em}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--line);background:
+     radial-gradient(120% 90% at 88% -10%, color-mix(in srgb,var(--blue-2) 24%, transparent), transparent 60%),
+     linear-gradient(180deg,var(--paper),var(--paper-2));padding:34px 28px;margin-top:22px}
+  .hero h1{font-size:clamp(28px,5vw,46px);margin:8px 0 6px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue)}
+  .hero .sub{font-size:17px;color:var(--ink-2);max-width:60ch}
+  .facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .fact{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:9px 13px;font-size:13.5px}
+  .fact b{display:block;font-size:16px;color:var(--blue);font-family:"Lora",serif}
+
+  /* alert */
+  .alert{border-radius:14px;padding:14px 16px;margin:14px 0;border:1px solid;font-size:14.5px}
+  .alert b{font-weight:800}
+  .alert.red{background:var(--red-soft);border-color:color-mix(in srgb,var(--red) 40%,var(--line))}
+  .alert.amber{background:var(--amber-soft);border-color:color-mix(in srgb,var(--amber) 40%,var(--line))}
+  .alert.blue{background:var(--blue-soft);border-color:color-mix(in srgb,var(--blue) 30%,var(--line))}
+  .alert .tag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .alert.red .tag{color:var(--red)} .alert.amber .tag{color:var(--amber)} .alert.blue .tag{color:var(--blue)}
+
+  /* tables */
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:12px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:520px}
+  th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line-2)}
+  th{background:var(--paper-2);color:var(--blue);font-weight:700;position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:0}
+  td.k{font-weight:600;color:var(--ink);white-space:nowrap}
+  .pri{font-weight:800;font-size:11px;padding:2px 7px;border-radius:6px}
+  .p1{background:var(--red-soft);color:var(--red)} .p2{background:var(--amber-soft);color:var(--amber)} .p3{background:var(--paper-2);color:var(--muted)}
+  .peg{color:var(--amber)}
+
+  /* weight bars */
+  .weights{display:grid;gap:9px;margin:10px 0}
+  .wrow{display:grid;grid-template-columns:200px 1fr 54px;gap:12px;align-items:center;font-size:14px}
+  .bar{height:14px;background:var(--paper-2);border-radius:999px;overflow:hidden;border:1px solid var(--line-2)}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--blue-2),var(--teal));border-radius:999px}
+  @media(max-width:560px){.wrow{grid-template-columns:1fr;gap:3px}.wrow .bar{grid-row:2}}
+
+  /* simulado */
+  .q{border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin:14px 0;background:var(--paper)}
+  .q .qn{font-weight:700;color:var(--blue);font-size:13px;letter-spacing:.02em}
+  .q .qt{margin:4px 0 12px;font-weight:500}
+  .opt{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer;transition:background .12s,border-color .12s}
+  .opt:hover{background:var(--paper-2)}
+  .opt input{margin-top:3px}
+  .opt .lt{font-weight:700;color:var(--ink-2)}
+  .opt.right{background:var(--rightbg);border-color:var(--green)}
+  .opt.wrong{background:var(--wrongbg);border-color:var(--red)}
+  .expl{display:none;margin-top:10px;border-left:3px solid var(--blue);background:var(--paper-2);padding:9px 13px;border-radius:0 8px 8px 0;font-size:14px}
+  .expl.show{display:block}
+  .expl b.ok{color:var(--green)} .expl b.no{color:var(--red)}
+  .passage{background:var(--paper-2);border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin:10px 0;font-style:italic}
+  .simbar{position:sticky;bottom:0;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:11px 20px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+  .btn:hover{background:var(--blue-2)}
+  .btn.ghost{background:transparent;color:var(--blue);border:1px solid var(--line)}
+  .score{font-weight:800;font-size:16px}
+  .score b{font-family:"Lora",serif;font-size:20px}
+  .blocklabel{font-family:"Lora",serif;font-size:17px;color:var(--teal);margin:22px 0 4px;font-weight:700}
+
+  /* flashcards */
+  .fctools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 14px}
+  .fc{border:1px solid var(--line);border-radius:13px;padding:16px 18px;background:var(--paper);cursor:pointer;min-height:96px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+  .fc .fq{font-weight:600}
+  .fc .fn{font-size:12px;color:var(--muted);font-weight:700}
+  .fc .fa{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);color:var(--ink-2)}
+  .fc.open .fa{display:block}
+  .fc .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .fc.open .hint{display:none}
+
+  /* aula (ensino antes do treino) */
+  .aula{background:var(--blue-soft);border:1px solid color-mix(in srgb,var(--blue) 25%,var(--line));border-radius:12px;padding:14px 16px;margin:6px 0 14px;font-size:14.5px;line-height:1.65}
+  .aula b{color:var(--ink)}
+  .matfilter{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+  .matfilter button{border:1px solid var(--line);background:var(--paper);color:var(--ink-2);border-radius:999px;padding:6px 13px;cursor:pointer;font:inherit;font-size:13.5px}
+  .matfilter button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .matdiv{font-family:"Lora",serif;color:var(--teal);font-size:20px;margin:28px 2px 2px;padding-top:14px;border-top:2px solid var(--line)}
+  /* central de estudos (hub) */
+  .hubgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+  @media(max-width:640px){.hubgrid{grid-template-columns:1fr}}
+  .hubc{display:block;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-decoration:none;color:var(--ink);background:var(--paper-2);transition:border-color .12s,transform .12s}
+  .hubc:hover{border-color:var(--blue);transform:translateY(-1px)}
+  .hubc .hn{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;background:var(--blue);color:#fff;border-radius:50%;font-weight:800;font-size:13px;margin-bottom:6px;font-family:"Public Sans",sans-serif}
+  .hubc b{display:block;color:var(--blue);margin:2px 0 4px}
+  .hubc .d{font-size:13.5px;color:var(--ink-2)}
+  /* plano checklist */
+  .chk{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line-2)}
+  .chk input{margin-top:5px;width:16px;height:16px;accent-color:var(--green);flex:0 0 auto}
+  .chk label{cursor:pointer}
+  .chk.done label{color:var(--muted);text-decoration:line-through}
+  h4.wk{margin:22px 0 4px;color:var(--blue);font-size:.98rem;border-bottom:2px solid var(--line-2);padding-bottom:5px}
+  .callout{background:var(--paper-2);border:1px solid var(--line-2);border-left:4px solid var(--green);border-radius:12px;padding:16px 20px}
+  /* domínio por prioridade */
+  .prband{display:flex;align-items:center;gap:12px;margin:30px 0 6px}
+  .prband .tag{font-weight:800;font-size:.85rem;color:#fff;padding:4px 12px;border-radius:20px;letter-spacing:.03em}
+  .prband.p1 .tag{background:var(--p1,#c0392b)} .prband.p2 .tag{background:var(--p2,#d68910)} .prband.p3 .tag{background:var(--p3,#5d6d7e)}
+  .prband h3{margin:0;font-size:1.05rem;color:var(--ink)}
+  .prband .cnt{margin-left:auto;font-size:.82rem;color:var(--muted)}
+  .domgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:760px){.domgrid{grid-template-columns:1fr}}
+  .domc{background:var(--paper-2);border:1px solid var(--line-2);border-radius:12px;padding:14px 16px}
+  .domc h4{margin:0 0 7px;color:var(--blue);font-size:1rem;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .domc h4 .mt{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  .domc p{margin:0 0 8px;font-size:.93rem;line-height:1.5}
+  .domc .na{margin:0;font-size:.9rem;background:var(--paper);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:8px 11px}
+  .domc .na b{color:var(--green)}
+  .domc .ap{margin:0 0 8px;font-size:.92rem;line-height:1.55;background:var(--blue-soft);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:8px 11px}
+  .domc .ap b{color:var(--blue)}
+  /* painel Revise seus erros */
+  .errpanel{margin-top:16px;background:var(--paper-2);border:1px solid var(--line-2);border-left:4px solid var(--p1,#c0392b);border-radius:12px;padding:14px 18px}
+  .errpanel h4{margin:0 0 6px;color:var(--p1,#c0392b);font-size:1.05rem}
+  .errpanel>p{margin:0 0 6px;font-size:.93rem}
+  .errpanel ol{margin:8px 0 0;padding-left:22px}
+  .errpanel li{margin-bottom:13px;line-height:1.5}
+  .errpanel .eq{font-style:italic;color:var(--ink-2);margin:3px 0}
+  .errpanel .ei{background:var(--paper);border-radius:8px;padding:7px 11px;margin-top:4px;font-size:.92rem}
+  .errpanel .you{color:var(--p1,#c0392b)} .errpanel .ok{color:var(--green)}
+  .errpanel .tip{font-size:.86rem;color:var(--muted);margin:10px 0 0}
+  .errpanel a{font-weight:700;color:var(--blue)}
+  .errpanel.zero{border-left-color:var(--green)} .errpanel.zero h4{color:var(--green)}
+  /* cronômetro */
+  .timer{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
+  .timer .tdisp{font-variant-numeric:tabular-nums;font-size:15px;color:var(--ink-2);white-space:nowrap;font-family:"Lora",serif}
+  .timer .tdisp.low{color:var(--red)}
+  .timer .tbtn2{padding:8px 12px;font-size:13px}
+  /* meu desempenho */
+  .desempenho .dhint{font-size:14px;color:var(--ink-2);margin:0}
+  .desempenho .dbest{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 10px}
+  .desempenho .dlbl{font-weight:700;color:var(--ink)}
+  .desempenho .dchip{background:var(--green-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--green) 30%,var(--line));border-radius:999px;padding:4px 11px;font-size:13px}
+  .desempenho .dlast{margin:0 0 10px;padding-left:20px;font-size:14px}
+  .desempenho .dlast li{margin:3px 0}
+  .desempenho .dclear{padding:7px 12px;font-size:13px}
+  /* próxima ação (recomendação personalizada) */
+  .proxima{background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 30%,var(--line));border-left:4px solid var(--green);border-radius:12px;padding:14px 16px;margin:2px 0 14px}
+  .proxima h4{margin:0 0 4px;color:var(--green);font-size:1rem}
+  .proxima p{margin:0 0 10px;font-size:.95rem;max-width:none}
+  .proxima .btn{padding:9px 16px;font-size:14px;text-decoration:none;display:inline-block}
+  .proxima .foco{font-size:13px;color:var(--ink-2);margin:8px 0 0}
+  .proxima[hidden]{display:none!important}
+  /* caderno de erros */
+  .dhint{font-size:14px;color:var(--ink-2)}
+  .cadtools{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+  .cadtools .btn{padding:8px 13px;font-size:13.5px}
+  .cadcount{font-family:"Public Sans",sans-serif;font-size:14px;color:var(--muted);font-weight:700}
+  /* progresso do cronograma */
+  .cprog{margin:8px 0 14px}
+  .cprow{display:grid;grid-template-columns:200px 1fr auto;gap:12px;align-items:center;font-size:13.5px}
+  .cbar{height:13px;background:var(--paper-2);border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
+  .cbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--teal));border-radius:999px;transition:width .3s}
+  @media(max-width:560px){.cprog .cprow{grid-template-columns:1fr;gap:3px}.cprog .cbar{grid-row:2}}
+  @media(max-width:560px){
+    .timer{margin-left:0;width:100%;justify-content:space-between;order:3}
+    .q .qt{font-size:15.5px} .opt{padding:11px 13px}
+    .card{padding:18px 15px}
+  }
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  .mini{background:var(--paper-2);border:1px solid var(--line-2);border-radius:11px;padding:14px 16px}
+  .mini h4{margin-top:0;color:var(--blue)}
+  footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px;padding:24px 0;text-align:center}
+  .back{position:fixed;right:16px;bottom:16px;z-index:40;background:var(--blue);color:#fff;border:0;border-radius:50%;width:44px;height:44px;font-size:18px;cursor:pointer;box-shadow:var(--shadow);display:none}
+  .back.show{display:block}
+  /* login / perfis */
+  .authwall{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:flex-start;justify-content:center;padding:24px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .authcard{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:26px 24px;max-width:390px;width:100%;margin:auto}
+  :root.authlock,:root.authlock body{overflow:hidden;height:100%}
+  .authwall[hidden]{display:none!important}
+  .authbrand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;font-family:"Lora",serif}
+  .authbrand b{color:var(--blue)}
+  .authbrand .drop{width:24px;height:24px;border-radius:50% 50% 50% 8px;transform:rotate(45deg);background:linear-gradient(135deg,var(--blue-2),var(--teal))}
+  .authsub{font-size:14px;color:var(--ink-2);margin:8px 0 16px}
+  .authcard input{width:100%;padding:11px 13px;margin:0 0 10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:16px;background:var(--paper);color:var(--ink)}
+  .authcard input:focus{outline:2px solid var(--blue-2);border-color:var(--blue-2)}
+  .pwwrap{position:relative;margin:0 0 10px}
+  .pwwrap input{margin:0!important;padding-right:82px}
+  .pwtoggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--blue);font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:6px 8px}
+  .authcard .btn{width:100%;margin-top:2px}
+  .authtoggle{font-size:13.5px;color:var(--ink-2);text-align:center;margin:12px 0 0}
+  .authmsg{background:var(--red-soft);color:var(--red);border-radius:8px;padding:8px 11px;font-size:13.5px;margin-bottom:10px}
+  .authnote{font-size:11.5px;color:var(--muted);margin:16px 0 0;line-height:1.5}
+  .userbox{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+  .userbox[hidden]{display:none!important}
+  .userbox #whoami{font-weight:700;color:var(--ink);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:560px){.userbox #whoami{max-width:80px}}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr;gap:0}
+    nav.toc{position:fixed;inset:54px 0 0 0;z-index:45;background:var(--paper);max-height:none;overflow-y:auto;padding:14px 18px;display:none;border-right:1px solid var(--line)}
+    nav.toc.open{display:block}
+    .menub{display:inline-block}
+    .cd{display:none}
+    /* sem desfoque (evita "tremer" ao rolar) e barra de Corrigir no fluxo (não flutua) */
+    .top{backdrop-filter:none;background:var(--paper)}
+    .simbar{position:static;backdrop-filter:none;background:var(--paper)}
+    .top .in{padding:9px 14px;gap:8px}
+    .brand{font-size:15px}
+    body.navopen{overflow:hidden}
+  }
+  @media print{
+    .top,nav.toc,.simbar,.back,.fctools,.menub,.authwall,.userbox{display:none!important}
+    html.authlock,html.authlock body{overflow:visible!important;height:auto!important}
+    .wrap{display:block;max-width:none;padding:0}
+    body{background:#fff}
+    .card,.q,.fc,.hero{box-shadow:none;break-inside:avoid}
+    .expl{display:block!important}
+    .fc .fa{display:block!important} .fc .hint{display:none}
+    a{color:inherit;text-decoration:none}
+    section{margin:16px 0}
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
+<script>
+  window.DMAE_SLUG="prf"; /* TROCAR por um id único do concurso, ex.: "prf", "pf", "emater". Mantém o progresso separado no backend compartilhado. */
+  try{ window.sb = window.supabase.createClient(
+    "https://eruszwjnekrvfbtylbuv.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydXN6d2puZWtydmZidHlsYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxOTM3MTksImV4cCI6MjEwNDc2OTcxOX0.XfxqmgTu9OLI6moAk6XhasQc9RmgI9w-lpbzbHSJqqo",
+    {auth:{persistSession:true,autoRefreshToken:true}}
+  ); }catch(e){ window.sb=null; }
+</script>
+</head>
+<body>
+<div id="authwall" class="authwall">
+  <div class="authcard">
+    <div class="authbrand"><span class="drop" aria-hidden="true"></span> Aprovação <b>PRF</b></div>
+    <p class="authsub">Cada pessoa tem a <strong>sua conta e o seu progresso</strong>, separados. Coloque seu e-mail e uma senha: se já tiver conta, você <strong>entra</strong>; se não tiver, ela é <strong>criada na hora</strong>.</p>
+    <div id="auth-msg" class="authmsg" hidden></div>
+    <input id="au-name" type="text" placeholder="Seu nome (opcional)" autocomplete="name">
+    <input id="au-email" type="email" placeholder="Seu e-mail" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false">
+    <div class="pwwrap">
+      <input id="au-pass" type="password" placeholder="Sua senha (mín. 4 caracteres)" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <button type="button" class="pwtoggle" id="au-eye" aria-label="Mostrar senha">Mostrar</button>
+    </div>
+    <button class="btn" id="au-btn" type="button">Entrar / Criar minha conta</button>
+    <p class="authnote">Sua conta funciona em <strong>qualquer aparelho</strong> (celular e computador): o progresso fica salvo <strong>na nuvem</strong> e é privado — ninguém vê o que você errou ou acertou. Use uma senha só para este site (não repita a do banco/e-mail).</p>
+  </div>
+</div>
+<script>
+/* ===== Autenticação Supabase (contas reais, sincroniza entre aparelhos) ===== */
+window.DMAE_KEY=function(k){var u="";try{u=localStorage.getItem("dmae:uid")||"";}catch(e){}return "dmae:u:"+u+":"+k;};
+window.DMAE_logout=function(){var done=function(){try{localStorage.removeItem("dmae:uid");}catch(e){}location.reload();};if(window.sb){window.sb.auth.signOut().then(done,done);}else{done();}};
+(function(){
+  var wall=document.getElementById("authwall");
+  function show(){if(wall){wall.hidden=false;wall.style.display="";}document.documentElement.classList.add("authlock");}
+  function hide(){if(wall){wall.hidden=true;wall.style.display="none";}document.documentElement.classList.remove("authlock");}
+  function msg(t){var m=document.getElementById("auth-msg");if(m){m.textContent=t;m.hidden=!t;}}
+  function busy(b){var x=document.getElementById("au-btn");if(x){x.disabled=b;x.textContent=b?"Entrando…":"Entrar / Criar minha conta";}}
+  show();
+  if(!window.sb){msg("Não consegui conectar ao servidor de contas. Confira sua internet e recarregue a página.");return;}
+  function onLogin(session){
+    try{localStorage.setItem("dmae:uid",session.user.id);}catch(e){}
+    var md=session.user.user_metadata||{};
+    var nome=md.name||md.nome||session.user.email;
+    var who=document.getElementById("whoami"),box=document.getElementById("userbox");
+    if(who)who.textContent=nome; if(box)box.hidden=false;
+    var lo=document.getElementById("logout"); if(lo)lo.onclick=window.DMAE_logout;
+    hide();
+    if(window.DMAE_syncPull)window.DMAE_syncPull();
+  }
+  async function go(){
+    var n=(document.getElementById("au-name").value||"").trim();
+    var e=(document.getElementById("au-email").value||"").trim().toLowerCase();
+    var pw=document.getElementById("au-pass").value||"";
+    if(!e||e.indexOf("@")<0){msg("Digite um e-mail válido.");return;}
+    if(pw.length<4){msg("A senha precisa ter pelo menos 4 caracteres.");return;}
+    msg("");busy(true);
+    try{
+      var r=await window.sb.auth.signInWithPassword({email:e,password:pw});
+      if(r.data&&r.data.session){onLogin(r.data.session);return;}
+      var su=await window.sb.auth.signUp({email:e,password:pw,options:{data:{name:(n||e.split("@")[0])}}});
+      if(su.error){
+        var t=(su.error.message||"").toLowerCase();
+        if(t.indexOf("already")>=0||t.indexOf("registered")>=0){msg("Essa conta já existe, mas a senha não confere. Tente a senha correta.");}
+        else{msg("Não foi possível entrar: "+su.error.message);}
+        busy(false);return;
+      }
+      if(su.data&&su.data.session){onLogin(su.data.session);return;}
+      msg("Conta criada — confirme pelo link no seu e-mail para entrar.");busy(false);
+    }catch(err){msg("Erro de conexão. Tente novamente.");busy(false);}
+  }
+  var b=document.getElementById("au-btn"); if(b)b.onclick=go;
+  ["au-email","au-pass","au-name"].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener("keydown",function(ev){if(ev.key==="Enter")go();});});
+  var eye=document.getElementById("au-eye"),pwf=document.getElementById("au-pass");
+  if(eye&&pwf)eye.onclick=function(){var s=pwf.type==="password";pwf.type=s?"text":"password";eye.textContent=s?"Ocultar":"Mostrar";pwf.focus();};
+  window.sb.auth.getSession().then(function(r){if(r.data&&r.data.session)onLogin(r.data.session);});
+})();
+</script>
+<header class="top">
+  <div class="in">
+    <button class="tbtn menub" id="menub" aria-label="Menu">☰</button>
+    <span class="brand"><span class="drop" aria-hidden="true"></span> Aprovação <b>PRF</b></span>
+    <span class="sp"></span>
+    <span class="cd" id="cd">Próximo concurso · <b id="cddays">—</b></span>
+    <span class="userbox" id="userbox" hidden><span id="whoami"></span><button class="tbtn" id="logout" type="button">Sair</button></span>
+    <button class="tbtn" id="theme" aria-label="Alternar tema">◐</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc" id="toc" aria-label="Índice">
+    <div class="grp">Comece aqui</div>
+    <a href="#inicio">Início</a>
+    <a href="#hub">Central de estudos</a>
+    <a href="#plano">Plano de estudos</a>
+    <a href="#memoria">Como fixar na memória</a>
+    <div class="grp">1 · Aprender + treinar</div>
+    <a href="#dominio">Domínio por prioridade</a>
+    <a href="#treinos-sec">Aulas + treinos por tema</a>
+    <div class="grp">2 · Praticar</div>
+    <a href="#antes-sim">Antes de cada simulado</a>
+    <a href="#simulado">Simulado 1</a>
+    <a href="#simulado2">Simulado 2</a>
+    <a href="#simulado3">Simulado 3</a>
+    <a href="#simulado4">Simulado 4</a>
+    <a href="#aleatorio">Simulado aleatório</a>
+    <a href="#especifico">Só CTB</a>
+    <div class="grp">3 · Revisar</div>
+    <a href="#caderno">Caderno de erros</a>
+    <a href="#flashcards">Flashcards</a>
+    <a href="#vespera">Revisão de véspera</a>
+    <div class="grp">4 · Consultar</div>
+    <a href="#ficha">Ficha do edital</a>
+    <a href="#portugues">O que estudar (verticalizado)</a>
+    <a href="#mudou">Mudanças 2019→2026</a>
+    <a href="#correcoes">Correções</a>
+    <a href="#perfil">Perfil da banca</a>
+    <a href="#fontes">Fontes oficiais</a>
+    <a href="#claude">Tutor no Claude Code</a>
+  </nav>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section id="inicio" class="hero">
+      <p class="eyebrow">Concurso Polícia Rodoviária Federal · Banca Cebraspe (Cespe)</p>
+      <h1>Seu cursinho completo para <em>Policial Rodoviário Federal</em></h1>
+      <p class="sub">Do zero ao dia da prova: edital verticalizado com as pegadinhas, aulas que ensinam passo a passo, treinos e simulados no formato <b>Certo/Errado</b> da Cebraspe, caderno de erros e plano de estudos com horas por dia. Feito para você entrar na PRF.</p>
+      <div class="facts">
+        <div class="fact"><b>120</b> itens · Certo/Errado</div>
+        <div class="fact"><b>Cebraspe</b> errada anula certa</div>
+        <div class="fact"><b>3 blocos</b> I(55) · II(30) · III(35)</div>
+        <div class="fact"><b>Nível Superior</b> qualquer curso</div>
+        <div class="fact"><b>~R$ 9.899</b> inicial (ref. 2021)</div>
+      </div>
+      <a class="btn" href="#hub" style="margin-top:20px;display:inline-block;text-decoration:none">Começar a estudar agora →</a>
+</section>
+
+    <div class="alert red" style="margin-top:16px">
+      <span class="tag">O jeito Cebraspe</span> — a prova é <b>Certo ou Errado</b>, e <b>cada item errado ANULA um item certo</b>. Chutar no escuro derruba sua nota. Aqui você treina a <b>decidir só quando tem certeza</b> e a reconhecer a pegadinha.
+    </div>
+    <div class="alert amber">
+      <span class="tag">Datas</span> — O edital do próximo concurso ainda não saiu. Este cursinho foi montado pelo <b>último edital (2021)</b> e será ajustado quando o novo sair. Legislação de Trânsito (CTB) é a matéria que <b>mais pesa</b>.
+    </div>
+
+    <!-- ============ CENTRAL DE ESTUDOS (HUB) ============ -->
+    <section id="hub">
+      <div class="card">
+        <p class="eyebrow">Central de estudos</p>
+        <h2 class="sec">Por onde começar</h2>
+        <div id="proxima" class="proxima"></div>
+        <p>Siga a trilha na ordem — aprender → praticar → revisar. Está tudo aqui dentro; você não precisa pesquisar fora.</p>
+        <div class="hubgrid">
+          <a class="hubc" href="#dominio"><span class="hn">1</span><b>Aprender + treinar</b><span class="d">Domínio por prioridade (o que mais cai) e aulas por tema, cada uma ensinando do zero: Aprenda → Entenda → Na prova.</span></a>
+          <a class="hubc" href="#simulado"><span class="hn">2</span><b>Praticar</b><span class="d">Treinos e simulados no formato Certo/Errado da Cebraspe, com o porquê de cada item e o caderno de erros.</span></a>
+          <a class="hubc" href="#flashcards"><span class="hn">3</span><b>Revisar</b><span class="d">Flashcards + plano de estudos com horas por dia até a prova (progresso salvo na sua conta).</span></a>
+          <a class="hubc" href="#ficha"><span class="hn">4</span><b>Consultar</b><span class="d">Ficha do concurso, edital verticalizado por bloco, perfil da banca e fontes oficiais.</span></a>
+        </div>
+        <div class="alert blue"><span class="tag">Prioridade</span> — a matéria que mais decide na PRF é <b>Legislação de Trânsito (CTB)</b>. Depois, <b>Português, Raciocínio Lógico e os Direitos</b> (Constitucional, Administrativo, Penal). Ataque primeiro os temas marcados <b>P1</b>.</div>
+        <h3 style="margin:18px 0 8px">Meu desempenho</h3>
+        <div id="desempenho" class="desempenho"></div>
+      </div>
+</section>
+
+    <!-- ============ 1. FICHA ============ -->
+    <section id="ficha">
+      <div class="card">
+        <p class="eyebrow">Seção 1</p>
+        <h2 class="sec">Ficha técnica do concurso</h2>
+        <div class="tw"><table><tbody>
+          <tr><td class="k">Órgão</td><td>Polícia Rodoviária Federal (PRF) — Ministério da Justiça e Segurança Pública. Patrulhamento ostensivo das <strong>rodovias federais</strong> (art. 144 da CF).</td></tr>
+          <tr><td class="k">Banca</td><td><strong>Cebraspe (Cespe/UnB)</strong> — cebraspe.org.br</td></tr>
+          <tr><td class="k">Cargo</td><td><strong>Policial Rodoviário Federal</strong> — Nível Superior (diploma em <strong>qualquer</strong> curso) + CNH categoria B ou superior.</td></tr>
+          <tr><td class="k">Vagas (2021)</td><td>1.500 (referência do último edital; o próximo ainda não saiu).</td></tr>
+          <tr><td class="k">Remuneração</td><td>~ R$ 9.899,88 inicial (referência 2021), jornada de 40h.</td></tr>
+          <tr><td class="k">Prova objetiva</td><td><strong>120 itens Certo/Errado</strong> em 3 blocos: <strong>Bloco I = 55</strong> · <strong>Bloco II = 30</strong> (Legislação de Trânsito) · <strong>Bloco III = 35</strong>.</td></tr>
+          <tr><td class="k">Correção (Cebraspe)</td><td><strong>Cada item errado anula um item certo</strong> (nota = certos − errados por bloco). Não deixar em branco só se tiver segurança; chute cego prejudica.</td></tr>
+          <tr><td class="k">Discursiva</td><td>Redação (texto dissertativo) — elimina quem não atinge o mínimo. Legislação de Trânsito costuma ser o tema mais pesado.</td></tr>
+          <tr><td class="k">Demais fases</td><td><strong>TAF</strong> (teste de aptidão física, eliminatório), exames de saúde, avaliação psicológica, investigação social e <strong>Curso de Formação</strong>.</td></tr>
+          <tr><td class="k">Idioma</td><td>Escolher <strong>inglês OU espanhol</strong> no Bloco I.</td></tr>
+          <tr><td class="k">Legislação</td><td>Vale a vigente até a data do edital. Atenção: o CTB foi muito alterado pela <strong>Lei 14.071/2020</strong> (pontuação da CNH, validade etc.).</td></tr>
+        </tbody></table></div>
+
+        <h3 id="dist">1.1 Os 3 blocos e o peso</h3>
+        <div class="weights">
+          <div class="wrow"><span>Bloco I — base + Física + Info</span><span class="bar"><i style="width:100%"></i></span><span>55 itens</span></div>
+          <div class="wrow"><span>Bloco III — Direitos + DH</span><span class="bar"><i style="width:64%"></i></span><span>35 itens</span></div>
+          <div class="wrow"><span>Bloco II — Legislação de Trânsito</span><span class="bar"><i style="width:55%"></i></span><span>30 itens</span></div>
+        </div>
+        <p class="peg"><strong>Estratégia:</strong> o Bloco II (Trânsito) tem "só" 30 itens, mas é <strong>a alma da PRF</strong> — cai muito na discursiva e no curso de formação, e é onde dá para gabaritar decorando a letra do CTB. Priorize-o junto com Português e os Direitos.</p>
+      </div>
+</section>
+
+    <!-- ============ 2. MUDOU ============ -->
+    <section id="mudou">
+      <div class="card">
+        <p class="eyebrow">Seção 2</p>
+        <h2 class="sec">O que muda para o próximo edital</h2>
+        <p>O próximo edital ainda não saiu. O que dá para prever pelo histórico:</p>
+        <ul>
+          <li>A banca deve seguir <strong>Cebraspe</strong>, no formato <strong>Certo/Errado</strong> — então estude já nesse estilo.</li>
+          <li>A base de matérias tende a se manter (Trânsito, Português, RLM, Direitos, DH, Física, Informática).</li>
+          <li>Podem mudar: <strong>número de vagas, salário e algumas leis</strong> (fique atento a alterações do CTB e das leis penais).</li>
+        </ul>
+        <p class="peg">Estude pelo <strong>edital de 2021</strong> agora; quando o novo sair, ajustamos os detalhes.</p>
+      </div>
+</section>
+
+    <!-- ============ 3. CORREÇÕES ============ -->
+    <section id="correcoes">
+      <div class="card">
+        <p class="eyebrow">Seção 3</p>
+        <h2 class="sec">Erros de quem estuda por material antigo</h2>
+        <div class="tw"><table>
+          <thead><tr><th>Material antigo diz</th><th>O certo hoje</th></tr></thead>
+          <tbody>
+          <tr><td>A prova é de múltipla escolha (A–E)</td><td><strong>É Certo/Errado</strong>, e errada anula certa</td></tr>
+          <tr><td>CNH vale 5 anos para todos</td><td><strong>Lei 14.071/2020</strong>: 10 anos (até 50), 5 (50–70), 3 (70+)</td></tr>
+          <tr><td>Suspende com 20 pontos (fixo)</td><td>Depende das gravíssimas: <strong>20, 30 ou 40 pontos</strong> em 12 meses</td></tr>
+          <tr><td>Chutar não custa nada</td><td>No Cebraspe, <strong>cada erro anula um acerto</strong> — chute cego derruba a nota</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+</section>
+
+    <!-- ============ 4. PERFIL ============ -->
+    <section id="perfil">
+      <div class="card">
+        <p class="eyebrow">Seção 4</p>
+        <h2 class="sec">Como a Cebraspe cobra (perfil da banca)</h2>
+        <ul>
+          <li><strong>Itens Certo/Errado</strong> — e <strong>errado anula certo</strong>. Marque só com segurança; na dúvida real, deixe em branco.</li>
+          <li>Cobra a <strong>letra da lei</strong> (CTB, CF, leis penais) e <strong>interpretação fina</strong> de texto.</li>
+          <li>Pegadinhas clássicas: <strong>palavra absoluta</strong> (sempre/somente), <strong>troca de um dado</strong> (prazo, número, órgão), <strong>generalizar</strong> o que tem exceção, e <strong>reescrita</strong> que muda o sentido.</li>
+          <li>Itens longos: uma parte certa + uma errada = item <strong>errado</strong>. Leia até o fim.</li>
+          <li>Recurso só com <strong>fundamentação</strong> (letra da lei/jurisprudência).</li>
+        </ul>
+      </div>
+</section>
+
+    <!-- ============ 5. VERTICALIZADO ============ -->
+    <section>
+      <p class="eyebrow" style="margin-left:2px">Seção 5 · Edital verticalizado (por bloco)</p>
+      <h2 class="sec" style="margin-left:2px">O que estudar em cada item — com a pegadinha</h2>
+      <p style="margin-left:2px">Prioridade: <span class="pri p1">P1</span> cai com certeza e pesa · <span class="pri p2">P2</span> cai com frequência · <span class="pri p3">P3</span> cai pouco. <em style="color:var(--muted)">(projetado pelo último edital da PRF — veja abaixo)</em></p>
+      <div class="alert blue" style="margin-left:2px">
+        <span class="tag">Como definimos as prioridades — pelo último edital, não achismo</span>
+        <p style="margin:6px 0 4px">O edital do próximo concurso ainda não saiu. As marcações P1/P2/P3 vêm de fontes verificáveis do <b>último concurso (PRF 2021, banca Cebraspe)</b>:</p>
+        <ul style="margin:0">
+          <li><b>Estrutura oficial da objetiva (PRF 2021):</b> <b>120 itens Certo/Errado</b> divididos em 3 blocos — <b>Bloco I</b> (Língua Portuguesa, Raciocínio Lógico-Matemático, Informática, Física) · <b>Bloco II</b> (Legislação de Trânsito) · <b>Bloco III</b> (Ética, Direitos Humanos, Direito Constitucional, Administrativo e Penal, Legislação especial). <b>Cada item errado anula um item certo.</b></li>
+          <li><b>O que mais pesa:</b> a <b>Legislação de Trânsito (CTB)</b> é um bloco inteiro e a matéria mais cobrada — é a prioridade nº 1. Depois vêm <b>Português, os Direitos e o Raciocínio Lógico</b>, que aparecem sempre.</li>
+          <li><b>Perfil da banca Cebraspe:</b> itens Certo/Errado com muitas <b>pegadinhas de troca</b> (número invertido, verbo trocado, “sempre/somente/nunca”) e cobrança de <b>lei seca</b> (CTB, Lei 14.071/2020, CF arts. 5º e 144, Código Penal).</li>
+        </ul>
+        <p class="peg" style="margin:8px 0 0;font-size:13px">Fontes: edital e provas da PRF 2021 (Cebraspe) e a legislação oficial (CTB, Lei 14.071/2020, CF, CP). Quando o novo edital sair, tudo será reajustado ao conteúdo confirmado.</p>
+      </div>
+    </section>
+
+    <section id="portugues">
+      <div class="card">
+        <p class="eyebrow">Seção 5 · Edital verticalizado</p>
+        <h2 class="sec">Bloco I — o que cai e a pegadinha <span style="color:var(--muted);font-family:Public Sans;font-size:14px">(55 itens)</span></h2>
+        <p style="margin-left:2px">Prioridade: <span class="pri p1">P1</span> cai com certeza e pesa · <span class="pri p2">P2</span> cai com frequência · <span class="pri p3">P3</span> cai pouco.</p>
+        <div class="tw"><table>
+          <thead><tr><th>Matéria</th><th>Pri.</th><th>O que cai</th><th>Pegadinha</th></tr></thead>
+          <tbody>
+          <tr><td class="k">Língua Portuguesa</td><td><span class="pri p1">P1</span></td><td>Interpretação; tipologia textual; coesão/coerência; crase; concordância e regência; pontuação; <strong>reescrita mantendo o sentido</strong>.</td><td class="peg">A reescrita muda o sentido (troca causa por consequência, some com a concessão) mas parece igual.</td></tr>
+          <tr><td class="k">Raciocínio Lógico-Matemático</td><td><span class="pri p1">P1</span></td><td>Lógica de proposições; tabelas-verdade; equivalências e negações; argumentos; conjuntos; análise combinatória e probabilidade.</td><td class="peg">Negar "se p então q" com "se não p então não q" (o certo é "p e não q").</td></tr>
+          <tr><td class="k">Informática</td><td><span class="pri p2">P2</span></td><td>Windows; Word/Excel; redes e internet; <strong>segurança da informação</strong> (malware, phishing, backup); computação em nuvem.</td><td class="peg">Trocar tipos de malware (vírus × worm × trojan) e confundir backup incremental × diferencial.</td></tr>
+          <tr><td class="k">Física</td><td><span class="pri p2">P2</span></td><td>Cinemática (velocidade, aceleração, <strong>distância de frenagem</strong>); dinâmica (força, atrito); energia e quantidade de movimento (colisões).</td><td class="peg">Dobrar a velocidade NÃO dobra a distância de frenagem — ela quadruplica (depende de v²).</td></tr>
+          <tr><td class="k">Ética e Cidadania</td><td><span class="pri p2">P2</span></td><td>Ética no serviço público; moral × ética; cidadania, direitos e deveres; conduta do agente público.</td><td class="peg">Confundir legalidade com moralidade; achar que "ético" = "legal".</td></tr>
+          <tr><td class="k">Geopolítica</td><td><span class="pri p3">P3</span></td><td>Brasil no mundo, fronteiras e regiões, blocos econômicos, meio ambiente, atualidades.</td><td class="peg">Dados desatualizados; confundir fronteiras/estados de fronteira.</td></tr>
+          <tr><td class="k">Inglês OU Espanhol</td><td><span class="pri p3">P3</span></td><td>Interpretação de texto no idioma escolhido (vocabulário, ideia central).</td><td class="peg">Escolha UM idioma e treine interpretação; não precisa "saber falar".</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+</section>
+
+    <section id="matematica">
+      <div class="card">
+        <p class="eyebrow">Seção 5 · como a banca cobra</p>
+        <h2 class="sec">A regra de ouro do Certo/Errado</h2>
+        <p>Na Cebraspe, <strong>cada item é uma afirmação</strong> que você julga <strong>Certo</strong> ou <strong>Errado</strong>. E o mais importante: <strong>um item errado ANULA um item certo</strong> no mesmo bloco. Ou seja, chutar no escuro pode zerar o que você acertou.</p>
+        <ul>
+          <li><strong>Só marque quando tiver segurança.</strong> Na dúvida real entre C e E, muitas vezes é melhor <strong>deixar em branco</strong> (não anula nada).</li>
+          <li><strong>Palavras absolutas</strong> (sempre, nunca, somente, apenas, todo, exclusivamente) geralmente deixam o item <strong>ERRADO</strong> — a lei quase sempre tem exceção.</li>
+          <li><strong>Uma palavra trocada</strong> torna tudo errado: número, prazo, órgão, "poderá" × "deverá", "crime" × "infração".</li>
+          <li>Leia o item <strong>inteiro</strong>: a Cebraspe põe uma verdade no começo e um erro no fim.</li>
+        </ul>
+        <p class="peg">Treine isso nos simulados desta página: cada questão é Certo/Errado, com o porquê explicado embaixo.</p>
+      </div>
+</section>
+
+    <section id="gerais">
+      <div class="card">
+        <h2 class="sec">Bloco II — Legislação de Trânsito (CTB) <span style="color:var(--muted);font-family:Public Sans;font-size:14px">(30 itens · a que mais decide)</span></h2>
+        <p>Base: <strong>Lei 9.503/1997 (CTB)</strong> e alterações, com destaque para a <strong>Lei 14.071/2020</strong>, além das <strong>Resoluções do Contran</strong>. É cobrança <strong>literal</strong> — quem decora a letra, gabarita.</p>
+        <div class="tw"><table>
+          <thead><tr><th>Tema</th><th>Pri.</th><th>O que cai</th><th>Pegadinha</th></tr></thead>
+          <tbody>
+          <tr><td class="k">Sistema Nacional de Trânsito</td><td><span class="pri p1">P1</span></td><td>Órgãos e competências: Contran, Denatran/Senatran, Detran, DNIT, <strong>PRF</strong>, JARI.</td><td class="peg">Trocar competência de um órgão por outro (normatizar × fiscalizar × julgar recurso).</td></tr>
+          <tr><td class="k">CNH e habilitação</td><td><span class="pri p1">P1</span></td><td>Categorias (A–E); processo; <strong>validade da CNH (Lei 14.071): 10 anos até 50 anos; 5 anos de 50 a 70; 3 anos com 70+</strong>; permissão (1 ano).</td><td class="peg">Usar a validade antiga (5 anos para todos) — mudou em 2020.</td></tr>
+          <tr><td class="k">Pontuação e penalidades</td><td><span class="pri p1">P1</span></td><td>Infrações: leve (3), média (4), grave (5), gravíssima (7 pontos). Suspensão por <strong>20/30/40 pontos em 12 meses</strong> (conforme haja gravíssimas).</td><td class="peg">Novo teto de pontos depende de quantas gravíssimas — não é mais 20 fixo.</td></tr>
+          <tr><td class="k">Infrações e medidas administrativas</td><td><span class="pri p1">P1</span></td><td>Infração × crime; retenção, remoção, recolhimento de documento; <strong>Lei Seca</strong> (art. 165/165-A).</td><td class="peg">Recusar o bafômetro é infração gravíssima (multiplicada) + medidas — não é "crime" automático.</td></tr>
+          <tr><td class="k">Regras de circulação e sinalização</td><td><span class="pri p2">P2</span></td><td>Preferências, velocidades, ultrapassagem, ordem de prevalência (agente > sinal > sinalização > regra).</td><td class="peg">Inverter a ordem de prevalência da sinalização.</td></tr>
+          <tr><td class="k">Crimes de trânsito</td><td><span class="pri p2">P2</span></td><td>Arts. 302+ (homicídio culposo, embriaguez, racha, omissão de socorro); penas.</td><td class="peg">Confundir infração administrativa com crime de trânsito.</td></tr>
+          <tr><td class="k">Equipamentos e veículos</td><td><span class="pri p3">P3</span></td><td>Obrigatórios; classificação de veículos; cadeirinha (Resolução Contran).</td><td class="peg">Faixas etárias/altura da cadeirinha.</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+</section>
+
+    <section id="legislacao">
+      <div class="card">
+        <h2 class="sec">Bloco III — Direitos e Direitos Humanos <span style="color:var(--muted);font-family:Public Sans;font-size:14px">(35 itens · cobrança literal)</span></h2>
+        <div class="tw"><table>
+          <thead><tr><th>Matéria</th><th>Pri.</th><th>O que cai</th><th>Pegadinha</th></tr></thead>
+          <tbody>
+          <tr><td class="k">Direito Constitucional</td><td><span class="pri p1">P1</span></td><td>Princípios; <strong>direitos e garantias (art. 5º)</strong>; organização do Estado; <strong>segurança pública (art. 144 — a PRF está aqui)</strong>.</td><td class="peg">Direito fundamental "absoluto" — quase nenhum é; há limites e exceções.</td></tr>
+          <tr><td class="k">Direito Administrativo</td><td><span class="pri p1">P1</span></td><td>Princípios (LIMPE); poderes; atos administrativos; agentes/servidores (Lei 8.112); improbidade.</td><td class="peg">Ato vinculado × discricionário; anulação × revogação.</td></tr>
+          <tr><td class="k">Direito Penal</td><td><span class="pri p1">P1</span></td><td>Aplicação da lei penal; crime (dolo/culpa); excludentes; penas; parte especial básica.</td><td class="peg">Legítima defesa × estado de necessidade; consumação × tentativa.</td></tr>
+          <tr><td class="k">Direito Processual Penal</td><td><span class="pri p2">P2</span></td><td>Inquérito; <strong>prisão (flagrante, preventiva, temporária)</strong>; provas; competência.</td><td class="peg">Prazos e quem pode decretar cada prisão.</td></tr>
+          <tr><td class="k">Legislação Especial</td><td><span class="pri p2">P2</span></td><td>Drogas (11.343); Armas — Estatuto do Desarmamento (10.826); Abuso de Autoridade (13.869); Tortura.</td><td class="peg">Porte × posse de arma; usuário × traficante.</td></tr>
+          <tr><td class="k">Direitos Humanos</td><td><span class="pri p2">P2</span></td><td>Declaração Universal; tratados; dignidade da pessoa humana; atuação policial e DH.</td><td class="peg">Achar que DH "protege bandido" — DH valem para todos e orientam a conduta policial.</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+</section>
+
+    <section id="especificos">
+      <div class="card">
+        <h2 class="sec">As outras fases (além da objetiva)</h2>
+        <ul>
+          <li><strong>Discursiva (redação):</strong> texto dissertativo sobre tema atual/ligado à segurança e trânsito. Treine estrutura (introdução, desenvolvimento com argumentos, conclusão) e clareza. Elimina quem não atinge o mínimo.</li>
+          <li><strong>TAF (teste de aptidão física):</strong> eliminatório — corrida, flexões/apoios, barra etc. Comece a treinar o físico <strong>desde já</strong>, em paralelo com o estudo.</li>
+          <li><strong>Saúde, psicológico, investigação social:</strong> mantenha documentação e conduta em dia.</li>
+          <li><strong>Curso de Formação:</strong> etapa final, com aulas e avaliações; Legislação de Trânsito volta com força.</li>
+        </ul>
+        <p class="peg">Foque a objetiva + discursiva para <strong>passar</strong>, mas não deixe o <strong>TAF</strong> para a última hora — muita gente é aprovada na prova e reprovada no físico.</p>
+      </div>
+</section>
+
+    <!-- ============ 6. PLANO ============ -->
+    <section id="plano">
+      <p class="eyebrow">Seção 6</p>
+      <h2 class="sec">Plano de estudos — 8 semanas + reta final (com horas por dia)</h2>
+      <div class="alert amber"><span class="tag">Sem data ainda</span> — o edital do próximo concurso da PRF <b>ainda não saiu</b>. Este plano é um <b>ciclo de 8 semanas</b> para você começar HOJE pela base (CTB) e chegar pronto. Quando o edital sair, você já terá a base e usa as últimas semanas como <b>reta final</b>. Ajuste as datas ao seu calendário.</div>
+      <p>Ritmo recomendado: <strong>~2 h nos dias úteis</strong> (19h–21h) e <strong>~3 h no sábado</strong> (simulado). Tempo integral? Dobre os blocos na mesma ordem. Pouco tempo? Corte P3 antes — <strong>nunca corte o CTB nem os P1</strong>.</p>
+
+      <h3>Ciclo semanal (horas por matéria — CTB pesa mais)</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Matéria</th><th>Horas/sem.</th><th>Por quê</th></tr></thead>
+        <tbody>
+        <tr><td class="k">Legislação de Trânsito (CTB)</td><td>5 h</td><td><strong>A matéria que mais pesa e mais cai</strong> — é o Bloco II inteiro e o coração da prova.</td></tr>
+        <tr><td class="k">Português</td><td>3 h30</td><td>Base de todos os blocos; evolui com questões comentadas.</td></tr>
+        <tr><td class="k">Direitos (Const./Adm./Penal)</td><td>4 h</td><td>Bloco III (35 itens) + legislação especial.</td></tr>
+        <tr><td class="k">Raciocínio Lógico</td><td>2 h30</td><td>Cai sempre; treino resolve.</td></tr>
+        <tr><td class="k">Informática + Física</td><td>2 h</td><td>Bloco I; pontos “fáceis” se você treinar.</td></tr>
+        <tr><td class="k">Atualidades + Ética + DH</td><td>1 h30</td><td>Notícias diárias + leitura das leis.</td></tr>
+        <tr><td class="k">Simulado + correção</td><td>3 h30</td><td>Todo sábado, cronometrado, formato Certo/Errado.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Rotina diária (para quem trabalha)</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Quando</th><th>O quê</th><th>Tempo</th></tr></thead>
+        <tbody>
+        <tr><td class="k">Ao acordar</td><td>Flashcards do dia anterior (revisão espaçada)</td><td>20 min</td></tr>
+        <tr><td class="k">Almoço</td><td>Manchetes + 3 fatos (Atualidades)</td><td>15 min</td></tr>
+        <tr><td class="k">19h00 · bloco 1</td><td>Matéria mais difícil do dia (teoria + esquema próprio)</td><td>50 min</td></tr>
+        <tr><td class="k">20h00 · bloco 2</td><td>Questões Certo/Errado da mesma matéria (mín. 15) + caderno de erros</td><td>50 min</td></tr>
+        <tr><td class="k">21h00 · bloco 3</td><td>Lei seca (CTB/CP) com marca-texto e tabela</td><td>40 min</td></tr>
+        <tr><td class="k">Antes de dormir</td><td>Reler as anotações do dia (só reler)</td><td>10 min</td></tr>
+        </tbody>
+      </table></div>
+      <p class="peg">A matéria difícil vai no <strong>1º bloco após um descanso</strong> (pico de atenção). Reler antes de dormir aproveita a consolidação no sono. <strong>Dormir 7–8 h vale mais que 1 h extra à meia-noite.</strong> E não esqueça do <strong>preparo físico</strong>: o concurso da PRF tem TAF eliminatório — comece a correr/treinar cedo.</p>
+
+      <h3>Cronograma por fases (marque conforme avança — fica salvo na sua conta)</h3>
+      <div id="plano-list">
+        <div class="chk"><input type="checkbox" id="f0"><label for="f0"><b>Fase 0 — Preparação:</b> baixe o último edital (2021) e a legislação (CTB + Lei 14.071/2020 + CF arts. 5º e 144 + CP). Faça o <a href="#simulado">simulado diagnóstico</a> para achar suas 3 matérias mais fracas.</label></div>
+        <div class="chk"><input type="checkbox" id="f1"><label for="f1"><b>Fase 1 — Base do CTB (a matéria que mais pesa):</b> estrutura do SNT, órgãos, CNH, validade e pontuação. Monte a tabela 10/5/3, 3-4-5-7, 20/30/40. Treine todo dia.</label></div>
+        <div class="chk"><input type="checkbox" id="f2"><label for="f2"><b>Fase 2 — CTB avançado + Português base:</b> infrações, crimes de trânsito, Lei Seca, sinalização e regras de circulação · Português: interpretação, conectivos, crase, concordância.</label></div>
+        <div class="chk"><input type="checkbox" id="f3"><label for="f3"><b>Fase 3 — Direitos (Constitucional + Administrativo):</b> art. 5º, art. 144 e organização do Estado · princípios (LIMPE), atos administrativos · Raciocínio Lógico (proposições e negações).</label></div>
+        <div class="chk"><input type="checkbox" id="f4"><label for="f4"><b>Fase 4 — Penal + Legislação especial:</b> excludentes, tentativa, crimes em espécie · Drogas, Armas, Abuso de autoridade, Tortura · Direitos Humanos e uso da força.</label></div>
+        <div class="chk"><input type="checkbox" id="f5"><label for="f5"><b>Fase 5 — Informática, Física e Atualidades:</b> segurança da informação · física aplicada ao trânsito (v², frenagem) · atualidades e geopolítica · Ética no serviço público.</label></div>
+        <div class="chk"><input type="checkbox" id="f6"><label for="f6"><b>Fase 6 — Revisão 1 + simulados:</b> refaça o caderno de erros por bloco; 2ª leitura das tabelas; simulados completos cronometrados no formato Certo/Errado.</label></div>
+        <div class="chk"><input type="checkbox" id="f7"><label for="f7"><b>Fase 7 — Reta final:</b> só revisão: caderno de erros, flashcards e tabelas. Nada de matéria nova. Ajuste o TAF (corrida/flexão/abdominal) se já estiver treinando.</label></div>
+      </div>
+
+      <h3 style="margin-top:34px">Plano dia a dia com horários (ciclo de 8 semanas)</h3>
+      <p>Cada dia já tem o que estudar e em que horário. Marque conforme faz; o progresso fica salvo. Se faltar tempo num dia, empurre o bloco 3 para o dia seguinte — <strong>nunca pule o simulado de sábado</strong>. Quando o edital sair com a data, encaixe este ciclo para terminar a Semana 8 na semana da prova.</p>
+
+      <div class="tw"><table>
+        <thead><tr><th>Modelo de horário</th><th>Blocos</th></tr></thead>
+        <tbody>
+        <tr><td class="k">Dias úteis (seg–sex)</td><td>Ao acordar <b>20 min</b> flashcards · almoço <b>15 min</b> atualidades · <b>19h00</b> bloco 1 (teoria, 50 min) · <b>20h00</b> bloco 2 (itens Certo/Errado, 50 min) · <b>21h00</b> bloco 3 (lei seca, 40 min).</td></tr>
+        <tr><td class="k">Sábado</td><td><b>08h30</b> simulado completo cronometrado no formato Cebraspe · depois correção + caderno de erros.</td></tr>
+        <tr><td class="k">Domingo</td><td><b>09h00</b> revisão leve: refazer os erros da semana + flashcards. Resto do dia: descanso (e treino físico para o TAF).</td></tr>
+        </tbody>
+      </table></div>
+
+      <div id="crono-prog" class="cprog"></div>
+
+      <div id="diario-list">
+        <h4 class="wk">Semana 1 — CTB: estrutura e órgãos</h4>
+        <div class="chk"><input type="checkbox" id="pd1"><label for="pd1"><b>Seg · 19h–21h:</b> CTB — Sistema Nacional de Trânsito (quem faz o quê): <a href="#treinos-sec">aula+treino</a>. Monte o quadro Contran/Detran/DNIT/PRF/JARI.</label></div>
+        <div class="chk"><input type="checkbox" id="pd2"><label for="pd2"><b>Ter · 19h–21h:</b> CTB — competências da PRF (art. 20) e do Detran · 15 itens Certo/Errado.</label></div>
+        <div class="chk"><input type="checkbox" id="pd3"><label for="pd3"><b>Qua · 19h–21h:</b> Português — interpretação de texto (aula+treino) · 10 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd4"><label for="pd4"><b>Qui · 19h–21h:</b> CTB — classificação das vias e velocidades · tabela de velocidades máximas.</label></div>
+        <div class="chk"><input type="checkbox" id="pd5"><label for="pd5"><b>Sex · 19h–21h:</b> Raciocínio Lógico — proposições e conectivos (aula+treino).</label></div>
+        <div class="chk"><input type="checkbox" id="pd6"><label for="pd6"><b>Sáb · 08h30 (3 h):</b> Simulado 1 (Certo/Errado) cronometrado · depois monte o caderno de erros.</label></div>
+        <div class="chk"><input type="checkbox" id="pd7"><label for="pd7"><b>Dom · 09h revisão leve:</b> Revisão leve: refazer os erros da semana + 10 flashcards. Descanso.</label></div>
+        <h4 class="wk">Semana 2 — CTB: CNH e pontuação (Lei 14.071/2020)</h4>
+        <div class="chk"><input type="checkbox" id="pd8"><label for="pd8"><b>Seg · 19h–21h:</b> CTB — CNH: categorias, validade 10/5/3 (aula+treino).</label></div>
+        <div class="chk"><input type="checkbox" id="pd9"><label for="pd9"><b>Ter · 19h–21h:</b> CTB — pontuação 3-4-5-7 e suspensão 20/30/40 · 15 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd10"><label for="pd10"><b>Qua · 19h–21h:</b> Português — coesão, conectivos e reescrita (aula+treino).</label></div>
+        <div class="chk"><input type="checkbox" id="pd11"><label for="pd11"><b>Qui · 19h–21h:</b> CTB — Permissão do novato, processo de habilitação · 10 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd12"><label for="pd12"><b>Sex · 19h–21h:</b> Raciocínio Lógico — negações e equivalências (aula+treino).</label></div>
+        <div class="chk"><input type="checkbox" id="pd13"><label for="pd13"><b>Sáb · 08h30 (3 h):</b> Simulado 2 (Certo/Errado) cronometrado · correção + caderno de erros.</label></div>
+        <div class="chk"><input type="checkbox" id="pd14"><label for="pd14"><b>Dom · 09h revisão leve:</b> Revisão: reescrever a tabela 10/5/3 e 20/30/40 de memória. Descanso.</label></div>
+        <h4 class="wk">Semana 3 — CTB: infrações, crimes e Lei Seca</h4>
+        <div class="chk"><input type="checkbox" id="pd15"><label for="pd15"><b>Seg · 19h–21h:</b> CTB — infração × crime (independência das esferas) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd16"><label for="pd16"><b>Ter · 19h–21h:</b> CTB — Lei Seca (arts. 165/165-A/306) e crimes de trânsito · 15 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd17"><label for="pd17"><b>Qua · 19h–21h:</b> Português — crase (teste do “ao”) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd18"><label for="pd18"><b>Qui · 19h–21h:</b> CTB — sinalização (placas/ordem de prevalência) · 10 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd19"><label for="pd19"><b>Sex · 19h–21h:</b> Física — energia cinética e frenagem (v²) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd20"><label for="pd20"><b>Sáb · 08h30 (3 h):</b> Simulado 3 (Certo/Errado) cronometrado · correção + caderno.</label></div>
+        <div class="chk"><input type="checkbox" id="pd21"><label for="pd21"><b>Dom · 09h revisão leve:</b> Revisão: refazer os erros de CTB. Descanso.</label></div>
+        <h4 class="wk">Semana 4 — Direito Constitucional</h4>
+        <div class="chk"><input type="checkbox" id="pd22"><label for="pd22"><b>Seg · 19h–21h:</b> Constitucional — art. 5º (direitos e garantias) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd23"><label for="pd23"><b>Ter · 19h–21h:</b> Constitucional — art. 144 e segurança pública (onde entra a PRF) · 15 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd24"><label for="pd24"><b>Qua · 19h–21h:</b> Português — concordância (haver/fazer impessoais) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd25"><label for="pd25"><b>Qui · 19h–21h:</b> Constitucional — organização do Estado e dos Poderes · 10 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd26"><label for="pd26"><b>Sex · 19h–21h:</b> Informática — segurança da informação (malwares) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd27"><label for="pd27"><b>Sáb · 08h30 (3 h):</b> Simulado 4 (Certo/Errado) cronometrado · correção + caderno.</label></div>
+        <div class="chk"><input type="checkbox" id="pd28"><label for="pd28"><b>Dom · 09h revisão leve:</b> Revisão: reler art. 5º e 144 + flashcards. Descanso.</label></div>
+        <h4 class="wk">Semana 5 — Direito Administrativo</h4>
+        <div class="chk"><input type="checkbox" id="pd29"><label for="pd29"><b>Seg · 19h–21h:</b> Administrativo — princípios (LIMPE) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd30"><label for="pd30"><b>Ter · 19h–21h:</b> Administrativo — atos administrativos (atributos, anulação × revogação) · 15 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd31"><label for="pd31"><b>Qua · 19h–21h:</b> Português — pontuação e regência · 10 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd32"><label for="pd32"><b>Qui · 19h–21h:</b> Administrativo — poderes da Administração e improbidade · 10 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd33"><label for="pd33"><b>Sex · 19h–21h:</b> Ética no serviço público (Dec. 1.171/94) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd34"><label for="pd34"><b>Sáb · 08h30 (3 h):</b> Refazer o Simulado 1 revendo só as erradas · comparar a nota.</label></div>
+        <div class="chk"><input type="checkbox" id="pd35"><label for="pd35"><b>Dom · 09h revisão leve:</b> Revisão: mnemônico LIMPE + anulação/revogação. Descanso.</label></div>
+        <h4 class="wk">Semana 6 — Direito Penal + Legislação especial</h4>
+        <div class="chk"><input type="checkbox" id="pd36"><label for="pd36"><b>Seg · 19h–21h:</b> Penal — excludentes de ilicitude e tentativa · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd37"><label for="pd37"><b>Ter · 19h–21h:</b> Penal — crimes em espécie (contra a pessoa e o patrimônio) · 15 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd38"><label for="pd38"><b>Qua · 19h–21h:</b> Legislação especial — Drogas (usuário × traficante) · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd39"><label for="pd39"><b>Qui · 19h–21h:</b> Legislação especial — Armas (posse × porte), Abuso, Tortura · 10 itens.</label></div>
+        <div class="chk"><input type="checkbox" id="pd40"><label for="pd40"><b>Sex · 19h–21h:</b> Direitos Humanos e uso da força · aula+treino.</label></div>
+        <div class="chk"><input type="checkbox" id="pd41"><label for="pd41"><b>Sáb · 08h30 (3 h):</b> Refazer o Simulado 2 cronometrado · correção.</label></div>
+        <div class="chk"><input type="checkbox" id="pd42"><label for="pd42"><b>Dom · 09h revisão leve:</b> Revisão: refazer erros de Penal + flashcards. Descanso.</label></div>
+        <h4 class="wk">Semana 7 — Fechamento + Atualidades</h4>
+        <div class="chk"><input type="checkbox" id="pd43"><label for="pd43"><b>Seg · 19h–21h:</b> Atualidades — segurança, fronteiras, meio ambiente (3 fatos/dia).</label></div>
+        <div class="chk"><input type="checkbox" id="pd44"><label for="pd44"><b>Ter · 19h–21h:</b> Física e RLM — revisar fórmulas e negações (refazer treinos).</label></div>
+        <div class="chk"><input type="checkbox" id="pd45"><label for="pd45"><b>Qua · 19h–21h:</b> Português campeões — crase, concordância, conectivos (refazer).</label></div>
+        <div class="chk"><input type="checkbox" id="pd46"><label for="pd46"><b>Qui · 19h–21h:</b> CTB campeões — CNH, pontuação, Lei Seca (refazer tabelas).</label></div>
+        <div class="chk"><input type="checkbox" id="pd47"><label for="pd47"><b>Sex · 19h–21h:</b> Simulado aleatório (misto) cronometrado · correção.</label></div>
+        <div class="chk"><input type="checkbox" id="pd48"><label for="pd48"><b>Sáb · 08h30 (3 h):</b> Refazer o simulado da pior nota · correção final por bloco.</label></div>
+        <div class="chk"><input type="checkbox" id="pd49"><label for="pd49"><b>Dom · 09h revisão leve:</b> Revisão: reler o caderno de erros inteiro. Descanso.</label></div>
+        <h4 class="wk">Semana 8 — Reta final (só revisão)</h4>
+        <div class="chk"><input type="checkbox" id="pd50"><label for="pd50"><b>Seg · 19h–21h:</b> Revisar caderno de erros — Bloco I (base + Física + Info).</label></div>
+        <div class="chk"><input type="checkbox" id="pd51"><label for="pd51"><b>Ter · 19h–21h:</b> Revisar caderno de erros — Bloco II (Legislação de Trânsito).</label></div>
+        <div class="chk"><input type="checkbox" id="pd52"><label for="pd52"><b>Qua · 19h–21h:</b> Revisar caderno de erros — Bloco III (Direitos).</label></div>
+        <div class="chk"><input type="checkbox" id="pd53"><label for="pd53"><b>Qui · 19h–21h:</b> Reler todas as tabelas e mnemônicos + flashcards embaralhados.</label></div>
+        <div class="chk"><input type="checkbox" id="pd54"><label for="pd54"><b>Sex · 19h–21h:</b> Simulado leve (30 itens) + revisar · nada de matéria nova.</label></div>
+        <div class="chk"><input type="checkbox" id="pd55"><label for="pd55"><b>Sáb · 08h30 (3 h):</b> Descanso ativo: revisão relâmpago de flashcards. Preparar documentos.</label></div>
+        <div class="chk"><input type="checkbox" id="pd56"><label for="pd56"><b>Dom · 09h revisão leve:</b> DESCANSO total. Dormir 7–8 h. Confiar no que estudou.</label></div>
+      </div>
+
+      <div style="margin-top:14px"><button class="btn ghost" id="plano-reset" type="button">Zerar meu progresso do cronograma</button></div>
+
+      <div class="callout" style="margin-top:22px">
+        <h3 style="margin-top:0">🗓️ Semana da prova — só revisão</h3>
+        <p><b>Nada de matéria nova.</b> Quando o edital sair e você souber a data, os últimos dias são de revisão leve e descanso.</p>
+        <div class="tw"><table>
+          <thead><tr><th>Momento</th><th>O quê</th></tr></thead>
+          <tbody>
+          <tr><td class="k">Últimos 3 dias</td><td>Só caderno de erros, tabelas (CNH 10/5/3, pontos 3-4-5-7, LIMPE) e flashcards campeões.</td></tr>
+          <tr><td class="k">Véspera</td><td>Descanso. Checklist de documentos. Dormir cedo (7–8 h).</td></tr>
+          <tr><td class="k">Na prova (Cebraspe)</td><td>Leia cada item com calma. <b>Só marque Certo/Errado com certeza</b> — o erro anula o acerto. Na dúvida real, deixe em branco. Cuidado com “sempre/somente/nunca”.</td></tr>
+          </tbody>
+        </table></div>
+        <p class="peg" style="margin-bottom:0">Lembre: a objetiva é só a 1ª fase. Depois vêm discursiva, TAF, exames e curso de formação — mas tudo começa por passar aqui.</p>
+      </div>
+</section>
+
+    <section id="memoria"><div class="card">
+      <p class="eyebrow">O método que fixa</p>
+      <h2 class="sec">Como fixar na memória (com base em evidências)</h2>
+      <div class="grid2">
+        <div class="mini"><h4>1. Recuperação ativa</h4><p style="margin:0">Feche o material e escreva/explique de memória; só depois confira. Reler passivamente é a técnica mais fraca.</p></div>
+        <div class="mini"><h4>2. Revisão espaçada</h4><p style="margin:0">Reveja cada tema em <strong>24 h, 7 dias e 21 dias</strong>. Flashcards com algoritmo (Anki) automatizam.</p></div>
+        <div class="mini"><h4>3. Questões como método</h4><p style="margin:0">Metade do tempo resolvendo itens Certo/Errado no estilo Cebraspe. Cada erro vira uma linha no caderno de erros (o quê, por quê, regra, como não repetir).</p></div>
+        <div class="mini"><h4>4. Intercalação</h4><p style="margin:0">Alterne matérias no mesmo dia (Port. + Mat. + Lei) — aprende-se mais "trocando de marcha".</p></div>
+        <div class="mini"><h4>5. Técnica Feynman</h4><p style="margin:0">Explique como para uma criança de 12 anos. Onde travar, falta entendimento.</p></div>
+        <div class="mini"><h4>6. Tabelas próprias</h4><p style="margin:0">Transforme listas da lei em tabelas (prazo, quem, o quê). Escrever à mão fixa mais.</p></div>
+      </div>
+      <h4>Mnemônicos que salvam (PRF)</h4>
+      <ul>
+        <li><strong>CNH 10 · 5 · 3</strong> — validade: 10 anos (até 50), 5 (50–70), 3 (70+).</li>
+        <li><strong>Pontos 3 · 4 · 5 · 7</strong> — leve, média, grave, gravíssima.</li>
+        <li><strong>Suspensão 20 · 30 · 40</strong> — 2+ gravíssimas / 1 gravíssima / nenhuma, em 12 meses.</li>
+        <li><strong>Prevalência: pessoa &gt; luz &gt; placa &gt; regra</strong> — agente, semáforo, sinalização, norma.</li>
+        <li><strong>Contran Normatiza · Detran Executa · PRF Patrulha · JARI Julga</strong> — cada órgão, um verbo.</li>
+        <li><strong>LIMPE</strong> — princípios do art. 37 (Legalidade, Impessoalidade, Moralidade, Publicidade, Eficiência).</li>
+        <li><strong>Crase:</strong> troque por masculino — deu <strong>“ao”</strong> = tem crase.</li>
+        <li><strong>Negar “se p, então q” = “p e não q”</strong> (não é “se não p…”).</li>
+        <li><strong>Energia = v²</strong> — dobrar a velocidade quadruplica a frenagem.</li>
+      </ul>
+    </div></section>
+
+    <!-- ============ DOMÍNIO POR PRIORIDADE ============ -->
+    <section id="dominio">
+      <p class="eyebrow">Domínio por prioridade</p>
+      <h2 class="sec">Dominar cada P1, P2 e P3 — do jeito certo</h2>
+      <p>A prova tem <strong>120 itens Certo/Errado</strong> e <strong>cada erro anula um acerto</strong>. Dominar os <b>P1</b> — os temas que <em>caem com certeza e pesam</em> — já decide a aprovação. Estude nesta ordem: <strong>primeiro TODOS os P1</strong>, depois P2, e só então P3. Em cada tema há três linhas: <b>Aprenda</b> (do zero, para quem esqueceu tudo), <b>Entenda</b> (a regra enxuta) e <b class="okc">🎯 Na prova</b> (o movimento exato + a pegadinha). Pratique nas <a href="#treinos-sec">aulas + treinos</a>.</p>
+
+      <div class="prband p1"><span class="tag">P1</span><h3>Cai com certeza e pesa — domine 100%</h3><span class="cnt">comece por aqui</span></div>
+      <div class="domgrid">
+<div class="domc"><h4>Estrutura do CTB e órgãos do trânsito <span class="mt">Legislação de Trânsito</span></h4>
+  <p class="ap"><b>Aprenda:</b> o trânsito é um time, e cada jogador tem UMA função. Decore o verbo: <b>Contran</b> cria as regras (normatiza), <b>Detran</b> executa no estado e dá a CNH, <b>DNIT</b> cuida das rodovias federais, a <b>PRF</b> patrulha e fiscaliza essas rodovias, e a <b>JARI</b> julga os recursos de multa. Ex.: quem inventa a regra nacional é o Contran; quem te para na estrada é a PRF.</p>
+  <p><b>Entenda:</b> o Sistema Nacional de Trânsito (SNT) reúne esses órgãos. Contran = normativo/consultivo; Senatran = coordena; Detran = executivo estadual (habilitação/veículo); PRF = policiamento das rodovias federais (art. 20 do CTB); JARI = 1ª instância de recurso.</p>
+  <p class="na"><b>🎯 Na prova:</b> a banca <b>troca o verbo</b>: diz que a PRF “julga recurso” (é a JARI) ou que o Detran “normatiza” (é o Contran). Leia o verbo com lupa.</p></div>
+<div class="domc"><h4>CNH, validade e pontuação (Lei 14.071/2020) <span class="mt">Legislação de Trânsito</span></h4>
+  <p class="ap"><b>Aprenda:</b> a Lei 14.071/2020 é a queridinha da banca. Guarde três blocos de números. <b>Validade da CNH</b>: 10 anos (até 50), 5 (50 a 70), 3 (70+). <b>Pontos por infração</b>: 3-4-5-7 (leve-média-grave-gravíssima). <b>Suspensão</b>: 20, 30 ou 40 pontos em 12 meses.</p>
+  <p><b>Entenda:</b> suspensão depende das gravíssimas: <b>20</b> pts (2+ gravíssimas), <b>30</b> (1 gravíssima), <b>40</b> (nenhuma). A Permissão do novato dura 1 ano.</p>
+  <p class="na"><b>🎯 Na prova:</b> cuidado com número trocado: “grave = 7” (é 5), “validade 5 anos até 50” (é 10). A banca adora inverter a tabela — decore-a de cabeça.</p></div>
+<div class="domc"><h4>Infrações, crimes e Lei Seca <span class="mt">Legislação de Trânsito</span></h4>
+  <p class="ap"><b>Aprenda:</b> existem duas “punições” diferentes e independentes: <b>infração</b> (multa, administrativa) e <b>crime</b> (processo, penal). Uma não exclui a outra. Dirigir bêbado é infração gravíssima (art. 165) E pode ser crime (art. 306). Recusar o bafômetro também é infração gravíssima (art. 165-A).</p>
+  <p><b>Entenda:</b> as esferas administrativa, penal e civil são independentes. Crimes de trânsito: homicídio culposo (302), lesão culposa (303), embriaguez (306), racha (308), fuga (305).</p>
+  <p class="na"><b>🎯 Na prova:</b> “foi absolvido no crime, então não paga multa” = errado (esferas independentes). Recusar bafômetro NÃO livra de punição — é gravíssima com multa multiplicada.</p></div>
+<div class="domc"><h4>Sinalização e regras de circulação <span class="mt">Legislação de Trânsito</span></h4>
+  <p class="ap"><b>Aprenda:</b> no trânsito há uma ordem de quem manda: primeiro o <b>agente</b> (a pessoa), depois o <b>semáforo</b>, depois as <b>placas</b>, e por último a regra geral. É como numa sala: o professor presente vale mais que o cartaz na parede. Placas de regulamentação (vermelhas, redondas) são ordens; de advertência (amarelas, losango) são avisos.</p>
+  <p><b>Entenda:</b> prevalência (art. 89): agente &gt; sinal luminoso &gt; sinalização (placas/marcas) &gt; norma de circulação. Preferência em rotatória e cruzamento sem sinalização segue regras do CTB.</p>
+  <p class="na"><b>🎯 Na prova:</b> a pegadinha é inverter a ordem (“placa vale mais que o agente” = errado). Guarde: <b>pessoa &gt; luz &gt; placa &gt; regra</b>.</p></div>
+<div class="domc"><h4>Interpretação de texto <span class="mt">Português</span></h4>
+  <p class="ap"><b>Aprenda:</b> interpretar é responder “o que ESTE texto diz?” usando só o que está escrito — como um detetive que só aceita provas do próprio texto, não a sua opinião. Se o texto fala de fiscalização nas rodovias, a resposta certa fala disso; uma alternativa verdadeira “no mundo real” mas fora do texto está errada.</p>
+  <p><b>Entenda:</b> três níveis: compreensão (o que diz), inferência (o que se conclui dele) e extrapolação (ir além — quase sempre a errada). A certa está ancorada no texto.</p>
+  <p class="na"><b>🎯 Na prova:</b> na Cebraspe, um item “Certo” tem que estar apoiado no texto. Desconfie de item que amplia demais (“sempre”, “todos”) ou que traz informação plausível mas ausente.</p></div>
+<div class="domc"><h4>Coesão, conectivos e reescrita <span class="mt">Português</span></h4>
+  <p class="ap"><b>Aprenda:</b> um texto é uma corrente: cada elo se liga ao anterior por palavrinhas (mas, porque, embora, portanto). Cada conectivo tem um valor fixo. A banca reescreve a frase e pergunta se o <b>sentido continua o mesmo</b> — e o segredo está no conectivo.</p>
+  <p><b>Entenda:</b> mas/porém = oposição; portanto/logo = conclusão; porque/pois = causa; embora/ainda que = concessão; se = condição. Trocar por um de valor diferente muda o sentido.</p>
+  <p class="na"><b>🎯 Na prova:</b> item clássico Cebraspe: “a substituição de X por Y mantém o sentido”. Se trocaram causa por concessão (porque→embora), é <b>Errado</b>.</p></div>
+<div class="domc"><h4>Concordância <span class="mt">Português</span></h4>
+  <p class="ap"><b>Aprenda:</b> concordar é o verbo “combinar” com quem faz a ação (o menino corre / os meninos correm). A pegadinha são os verbos <b>sem dono</b>: <i>haver</i> (= existir) e <i>fazer</i> (= tempo) ficam sempre no singular. Por isso “houveram problemas” é sempre erro.</p>
+  <p><b>Entenda:</b> o verbo concorda com o sujeito; haver/fazer impessoais → singular (“Houve falhas”, “Faz dois anos”). Existir tem sujeito e concorda (“Existem falhas”).</p>
+  <p class="na"><b>🎯 Na prova:</b> “Houveram” e “fazem X anos” são sempre erro. Sujeito posposto (“Chegaram os documentos”) exige atenção ao plural.</p></div>
+<div class="domc"><h4>Crase <span class="mt">Português</span></h4>
+  <p class="ap"><b>Aprenda:</b> crase é só um acento no “a” (à) que aparece quando dois “a” se encontram. Teste infalível: <b>troque a palavra seguinte por uma masculina</b>; se virar “ao”, tem crase. Ex.: “obedeço <b>à</b> lei” → “obedeço <b>ao</b> regulamento” → deu “ao” → tem crase.</p>
+  <p><b>Entenda:</b> crase = preposição a + artigo a(s), só diante de feminino. Locuções sempre têm: às vezes, à noite, à vista, à medida que, às 14h.</p>
+  <p class="na"><b>🎯 Na prova:</b> nunca há crase antes de verbo, de masculino ou de pronome (a ela, a você). O teste do “ao” resolve quase tudo.</p></div>
+<div class="domc"><h4>Raciocínio lógico — proposições e negações <span class="mt">Raciocínio Lógico</span></h4>
+  <p class="ap"><b>Aprenda:</b> aqui você trabalha com frases verdadeiras/falsas e com “se... então”. O que mais cai é a <b>negação</b>. Negar “se chove, levo guarda-chuva” NÃO é “se não chove...”; é “<b>chove E não levo</b>” (a condição ocorreu, a consequência não).</p>
+  <p><b>Entenda:</b> conectivos: e (∧, só V se ambos), ou inclusivo (∨, F só se ambos F), <b>ou...ou exclusivo</b> (V só quando os valores são diferentes), se→então (F só quando 1º V e 2º F), ↔ (V quando os dois são iguais). ~(p→q) = p ∧ ~q. Equivalente de p→q = contrapositiva ~q→~p.</p>
+  <p class="na"><b>🎯 Na prova:</b> a equivalente é a contrapositiva, NÃO a recíproca (q→p). Negar “todo” vira “existe um que não”; negar “algum” vira “nenhum”. Cuidado com a disjunção <b>exclusiva</b> (“ou...ou”): V+V dá Falso.</p></div>
+        <div class="domc"><h4>Proposições e tabela-verdade <span class="mt">Raciocínio Lógico</span></h4>
+  <p class="ap"><b>Aprenda:</b> <b>proposição</b> é uma frase que dá para dizer se é Verdadeira ou Falsa (tem verbo e sentido completo). <b>Não são</b> proposições: perguntas, exclamações, ordens (“Faça silêncio!”) e frases com algo indefinido (“Ele foi o melhor”, “x+2=5” sem dizer o x).</p>
+  <p><b>Entenda:</b> a banca camufla conectivos: “<i>mas/porém</i>” = E; “<i>Quem estuda, passa</i>” e “<i>Todo A é B</i>” = condicional (Se... então). Tabela-verdade tem <b>2ⁿ</b> linhas (n = proposições simples diferentes; p e ~p não contam como duas).</p>
+  <p class="na"><b>🎯 Na prova:</b> primeiro pergunte “isto é proposição?” (ordem/pergunta/aberta = não). Depois traduza a frase camuflada para o conectivo certo antes de resolver.</p></div>
+<div class="domc"><h4>Direito Constitucional — art. 5º e segurança pública <span class="mt">Direito Constitucional</span></h4>
+  <p class="ap"><b>Aprenda:</b> o art. 5º é a lista de direitos de todo mundo (igualdade, casa inviolável, não ao anonimato). O art. 144 lista quem faz a segurança pública — e a <b>PRF está lá</b>, para patrulhar as rodovias federais. Nenhum direito é absoluto: todos têm limites.</p>
+  <p><b>Entenda:</b> art. 5º: direitos e garantias fundamentais (casa é asilo inviolável — entra sem ordem só em flagrante/desastre/socorro; de dia com ordem judicial). Art. 144: PF, PRF, PFF, polícias civis, militares e bombeiros.</p>
+  <p class="na"><b>🎯 Na prova:</b> “direito é absoluto” = errado. “PRF é polícia estadual” = errado (é federal, art. 144). Anonimato é vedado, mesmo na livre manifestação.</p></div>
+<div class="domc"><h4>Direito Administrativo — princípios (LIMPE) e atos <span class="mt">Direito Administrativo</span></h4>
+  <p class="ap"><b>Aprenda:</b> a Administração segue 5 princípios: <b>LIMPE</b> (Legalidade, Impessoalidade, Moralidade, Publicidade, Eficiência). Legalidade para o servidor = só pode fazer o que a lei <b>autoriza</b> (para o cidadão é o contrário: pode tudo que a lei não proíbe).</p>
+  <p><b>Entenda:</b> art. 37 da CF. Atos administrativos têm atributos: presunção de legitimidade, imperatividade, autoexecutoriedade. Anulação (ato ilegal, efeito retroativo) × revogação (ato legal inoportuno, efeito futuro).</p>
+  <p class="na"><b>🎯 Na prova:</b> não confunda anular (ilegalidade, retroage) com revogar (conveniência, só para frente). Legalidade do servidor = fazer só o que a lei permite.</p></div>
+<div class="domc"><h4>Direito Penal — excludentes e tentativa <span class="mt">Direito Penal</span></h4>
+  <p class="ap"><b>Aprenda:</b> algumas situações fazem um fato deixar de ser crime (excludentes de ilicitude): legítima defesa, estado de necessidade, estrito cumprimento do dever legal e exercício regular de direito. Um policial que repele uma agressão injusta age em legítima defesa.</p>
+  <p><b>Entenda:</b> arts. 23 a 25 do CP. Legítima defesa = repelir injusta agressão, atual ou iminente, com os meios necessários e moderação. Tentativa (art. 14): iniciada a execução e não consumada por circunstância alheia → pena reduzida de 1/3 a 2/3.</p>
+  <p class="na"><b>🎯 Na prova:</b> estado de necessidade ≠ legítima defesa (agressão humana injusta). Na tentativa a redução é de 1/3 a 2/3. Excesso (doloso ou culposo) é punido.</p></div>
+      </div>
+
+      <div class="prband p2"><span class="tag">P2</span><h3>Cai bastante — garanta depois dos P1</h3><span class="cnt">segundo bloco</span></div>
+      <div class="domgrid">
+<div class="domc"><h4>Segurança da informação <span class="mt">Informática</span></h4>
+  <p class="ap"><b>Aprenda:</b> pense em 3 pilares: manter em <b>segredo</b> (confidencialidade), <b>intacto</b> (integridade) e <b>disponível</b>. Os inimigos são os malwares: vírus (precisa de hospedeiro), worm (se espalha sozinho), trojan (finge ser útil) e ransomware (sequestra os dados e pede resgate).</p>
+  <p><b>Entenda:</b> phishing = engenharia social por e-mail/mensagem. Defesas: senha forte, 2 fatores, antivírus atualizado e backup (offline). HTTPS/criptografia protege os dados em trânsito.</p>
+  <p class="na"><b>🎯 Na prova:</b> vírus ≠ worm (worm se autopropaga). Contra ransomware, a defesa que salva é o <b>backup offline</b>. 2 fatores aumenta a segurança do login.</p></div>
+<div class="domc"><h4>Ética no serviço público <span class="mt">Ética</span></h4>
+  <p class="ap"><b>Aprenda:</b> ética no serviço público é agir com honestidade mesmo quando ninguém vê. O servidor trabalha para o cidadão; a coisa pública não é dele. O Decreto 1.171/94 traz o Código de Ética do servidor federal.</p>
+  <p><b>Entenda:</b> princípios: a função pública é exercício de honra; o servidor deve zelar pela coisa pública; a cortesia e a presteza são deveres; e a moralidade (o certo/errado) integra a legalidade.</p>
+  <p class="na"><b>🎯 Na prova:</b> questões cobram condutas: usar o cargo em proveito próprio = vedado. “O fim justifica os meios” = errado na ética pública.</p></div>
+<div class="domc"><h4>Direitos Humanos <span class="mt">Direitos Humanos</span></h4>
+  <p class="ap"><b>Aprenda:</b> direitos humanos são de <b>todas</b> as pessoas, sem exceção — não “protegem bandido”, garantem que o Estado não abuse de ninguém. Orientam o uso da força pelo policial: só a força mínima necessária.</p>
+  <p><b>Entenda:</b> universais, indivisíveis e interdependentes. Declaração Universal (ONU, 1948). Uso da força: legalidade, necessidade, proporcionalidade e moderação.</p>
+  <p class="na"><b>🎯 Na prova:</b> “DH valem só para quem tem bons antecedentes” = errado (são universais). Uso da força tem que ser proporcional — força excessiva é ilegal.</p></div>
+<div class="domc"><h4>Legislação especial (Drogas, Armas, Abuso, Tortura) <span class="mt">Direito Penal</span></h4>
+  <p class="ap"><b>Aprenda:</b> são leis que a PRF aplica na estrada. <b>Drogas</b> (11.343/06): usuário não é preso (medidas do art. 28), traficante sim. <b>Armas</b> (10.826/03): posse (em casa) ≠ porte (trazer consigo). <b>Abuso de autoridade</b> (13.869/19) pune o agente que excede. <b>Tortura</b> (9.455/97) é crime hediondo.</p>
+  <p><b>Entenda:</b> distinção usuário × traficante depende de quantidade, local e circunstâncias. Porte ilegal e tráfico são crimes; posse irregular tem tratamento próprio.</p>
+  <p class="na"><b>🎯 Na prova:</b> “usuário de droga é preso em flagrante e vai para a cadeia” = errado (art. 28: penas alternativas). Posse ≠ porte é pegadinha certa.</p></div>
+      </div>
+
+      <div class="prband p3"><span class="tag">P3</span><h3>Cai menos — pegue os pontos fáceis</h3><span class="cnt">por último</span></div>
+      <div class="domgrid">
+<div class="domc"><h4>Física aplicada ao trânsito <span class="mt">Física</span></h4>
+  <p class="ap"><b>Aprenda:</b> a física explica a estrada. A <b>energia de um carro em movimento</b> depende do <b>quadrado</b> da velocidade (v²): por isso dobrar a velocidade <b>quadruplica</b> a distância de frenagem. Mais peso = mais difícil parar. O atrito do pneu é o que freia.</p>
+  <p><b>Entenda:</b> energia cinética Ec = m·v²/2. Distância de frenagem cresce com v². Cinemática: MRU e MRUV, v = v₀ + a·t. Forças: atrito, peso, normal.</p>
+  <p class="na"><b>🎯 Na prova:</b> “dobrar a velocidade dobra a frenagem” = errado (quadruplica). Energia depende de v², não de v.</p></div>
+<div class="domc"><h4>Atualidades e geopolítica <span class="mt">Atualidades</span></h4>
+  <p class="ap"><b>Aprenda:</b> cai o que está no noticiário sério: segurança pública, fronteiras, meio ambiente, política nacional e mundial. Leia manchetes todos os dias e guarde 3 fatos com data e nomes.</p>
+  <p><b>Entenda:</b> foco em temas ligados à atuação da PRF: rodovias, fronteiras (tráfico, contrabando), acidentes, operações. Também economia e organismos internacionais.</p>
+  <p class="na"><b>🎯 Na prova:</b> não decore opinião; guarde <b>fatos, nomes e datas</b>. Prefira fontes de referência e cheque números.</p></div>
+      </div>
+      <div class="alert blue"><span class="tag">Regra de ouro Cebraspe</span> — como o erro anula o acerto, só marque quando tiver <b>certeza</b>. Nos P1 você deve chegar com convicção; nos P3, se ficar na dúvida real, <b>deixe em branco</b> (em branco não anula nada).</div>
+</section>
+
+    <!-- ============ AULAS + TREINOS ============ -->
+    <section id="treinos-sec">
+      <div class="card">
+        <p class="eyebrow">Aula + prática</p>
+        <h2 class="sec">Aulas e treinos por tema</h2>
+        <p>Aqui você <strong>aprende primeiro</strong> (uma aula curta com exemplo) e <strong>treina em seguida</strong>. Em cada questão aparece o gabarito e a <strong>explicação do porquê</strong> — leia mesmo quando acertar: é o que fixa na memória. Tudo aqui dentro; você não precisa pesquisar fora.</p>
+        <div class="matfilter" id="matfilter"></div>
+      </div>
+      <div id="treinos"></div>
+    </section>
+
+    <!-- ============ ANTES DE CADA SIMULADO ============ -->
+    <section id="antes-sim">
+      <p class="eyebrow">Praticar · o que estudar antes</p>
+      <h2 class="sec">Antes de cada simulado — o que estudar</h2>
+      <p>Não faça os simulados no escuro. Estude o tema (na seção <strong>Aulas e treinos por tema</strong>, que tem filtro por matéria) e só depois faça o simulado. O ciclo que fixa é: <strong>estudar o treino → fazer o simulado → o erro cai no caderno → voltar e estudar só o que errou.</strong> Está tudo aqui dentro; você não precisa sair do site.</p>
+
+      <div class="alert red"><span class="tag">Regra de ouro Cebraspe</span> — a prova é Certo/Errado e <b>cada erro anula um acerto</b>. Treine desde já a <b>só marcar quando tem certeza</b>; na dúvida real, deixe em branco (em branco não anula).</div>
+
+      <div class="grid2">
+        <div class="mini">
+          <h4>Simulado 1 — faça agora, SEM estudar</h4>
+          <p style="margin:0">É o seu <strong>diagnóstico</strong>. Faça cronometrado para o site mostrar (no resultado líquido e no caderno de erros) onde você está mais fraco. Não se cobre nota aqui — é só o ponto de partida.</p>
+        </div>
+        <div class="mini">
+          <h4>Antes do Simulado 2 — o núcleo que mais pesa</h4>
+          <p style="margin:0"><strong>Legislação de Trânsito (CTB):</strong> estrutura do SNT e órgãos; CNH, validade (10/5/3) e pontuação (3-4-5-7, suspensão 20/30/40).<br><strong>Português:</strong> interpretação, conectivos, crase e concordância.</p>
+        </div>
+        <div class="mini">
+          <h4>Antes do Simulado 3 — trânsito + Direitos</h4>
+          <p style="margin:0"><strong>CTB:</strong> infrações × crimes, Lei Seca, sinalização e regras de circulação.<br><strong>Direitos:</strong> Constitucional (art. 5º e art. 144) e Administrativo (LIMPE, atos).<br><strong>Raciocínio Lógico:</strong> proposições, negações e equivalências.</p>
+        </div>
+        <div class="mini">
+          <h4>Antes do Simulado 4 — fechar os blocos</h4>
+          <p style="margin:0"><strong>Penal:</strong> excludentes, tentativa; <strong>legislação especial</strong> (Drogas, Armas, Abuso, Tortura).<br><strong>Bloco I:</strong> Informática (segurança) e Física (v², frenagem).<br><strong>Ética e Direitos Humanos.</strong> Antes, refaça o <strong>Caderno de erros</strong> até zerar.</p>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:16px">
+        <h4 style="margin-top:0">A ordem de prioridade dentro de cada estudo</h4>
+        <p style="margin:0">Sempre nesta ordem: <strong>1º Legislação de Trânsito (CTB)</strong> — a que mais cai e mais pesa → <strong>2º Português, Direitos e Raciocínio Lógico</strong> (aparecem sempre) → <strong>3º Informática, Física, Atualidades, Ética e DH</strong>. E dentro de cada matéria, ataque primeiro os temas marcados <strong>P1</strong>. Meta em cada simulado: subir o seu <strong>líquido</strong> (certos − errados) a cada tentativa.</p>
+      </div>
+</section>
+
+    <!-- ============ 7. SIMULADO ============ -->
+    <section id="simulado"><div class="card">
+      <p class="eyebrow">Seção 7 · itens Certo/Errado · formato Cebraspe</p>
+      <h2 class="sec">Simulado no formato da prova</h2>
+      <p>Marque <strong>Certo</strong> ou <strong>Errado</strong> em cada item e clique em <strong>Corrigir prova</strong>. O site mostra seu resultado <em>líquido</em> (certos − errados, o critério da Cebraspe) e o comentário de cada item. Use o Simulado 1 como diagnóstico e refaça mais adiante. <strong>Só marque quando tiver certeza</strong> — o erro anula o acerto.</p>
+      <div id="sim"></div>
+      <div class="simbar">
+        <button class="btn" id="corrigir">Corrigir prova</button>
+        <button class="btn ghost" id="limpar">Limpar</button>
+        <span class="score" id="scorebox" aria-live="polite"></span>
+      </div>
+    </div></section>
+
+    <!-- ============ SIMULADO 2 ============ -->
+    <section id="simulado2"><div class="card">
+      <p class="eyebrow">Prova online 2 · itens Certo/Errado</p>
+      <h2 class="sec">Simulado 2 (inédito)</h2>
+      <p>Segunda prova no formato Cebraspe (itens Certo/Errado), cobrindo os três blocos: Bloco I (base + Física + Informática), Bloco II (Legislação de Trânsito) e Bloco III (Direitos). Marque tudo e clique em <strong>Corrigir</strong> — a explicação de cada item aparece embaixo dele.</p>
+      <div id="quiz-sim2"></div>
+    </div></section>
+
+    <!-- ============ SIMULADO 3 ============ -->
+    <section id="simulado3"><div class="card">
+      <p class="eyebrow">Prova online 3 · itens Certo/Errado</p>
+      <h2 class="sec">Simulado 3 (inédito)</h2>
+      <p>Terceira prova no formato Cebraspe (itens Certo/Errado) pelos três blocos. Cronometre, marque só o que tem certeza e clique em <strong>Corrigir</strong>.</p>
+      <div id="quiz-sim3"></div>
+    </div></section>
+
+    <!-- ============ SIMULADO 4 ============ -->
+    <section id="simulado4"><div class="card">
+      <p class="eyebrow">Prova online 4 · itens Certo/Errado</p>
+      <h2 class="sec">Simulado 4 (inédito)</h2>
+      <p>Quarta prova no formato Cebraspe (itens Certo/Errado). Use o <strong>cronômetro</strong> da barra de correção para treinar o ritmo. Marque só o que tem certeza e clique em <strong>Corrigir</strong> — o painel <em>Revise seus erros</em> aparece no fim.</p>
+      <div id="quiz-sim4"></div>
+    </div></section>
+
+    <!-- ============ SIMULADO ALEATÓRIO ============ -->
+    <section id="aleatorio"><div class="card">
+      <p class="eyebrow">Prova sorteada do banco · itens Certo/Errado</p>
+      <h2 class="sec">Simulado aleatório</h2>
+      <p>Sorteia <strong>40 itens Certo/Errado do banco inteiro</strong> (todos os simulados e treinos), <strong>sempre diferentes</strong> — assim você treina o conteúdo, e não a ordem das respostas. Tem cronômetro, e os erros vão para o seu <a href="#caderno">caderno</a>.</p>
+      <button class="btn" id="aleatorio-gerar" type="button">Gerar 40 questões</button>
+      <div id="quiz-aleatorio" style="margin-top:14px"></div>
+    </div></section>
+
+    <!-- ============ SÓ ESPECÍFICOS ============ -->
+    <section id="especifico"><div class="card">
+      <p class="eyebrow">Treino focado · a matéria que mais pesa</p>
+      <h2 class="sec">Só Legislação de Trânsito (CTB)</h2>
+      <p>A <strong>Legislação de Trânsito (CTB)</strong> é a matéria que mais cai e mais pesa na PRF — é um bloco inteiro da prova. Aqui você treina <strong>só ela</strong>: itens Certo/Errado sorteados do banco de CTB, sempre diferentes. Os erros vão para o seu <a href="#caderno">caderno</a>.</p>
+      <button class="btn" id="espec-gerar" type="button">Gerar 10 de CTB</button>
+      <div id="espec-list" style="margin-top:14px"></div>
+    </div></section>
+
+    <!-- ============ CADERNO DE ERROS ============ -->
+    <section id="caderno"><div class="card">
+      <p class="eyebrow">Revisar</p>
+      <h2 class="sec">Meu caderno de erros <span id="cad-count" class="cadcount"></span></h2>
+      <p>Toda questão que você errar nos simulados e nos treinos entra aqui <strong>automaticamente</strong> e fica salva no seu navegador. Refaça-as quantas vezes precisar — <strong>rever o próprio erro é o que mais fixa</strong>. Quando acertar, clique em <em>Tirar do caderno as que acertei</em> para ele ir enxugando.</p>
+      <div class="cadtools">
+        <button class="btn ghost" id="cad-remove" type="button">Tirar do caderno as que acertei</button>
+        <button class="btn ghost" id="cad-download" type="button">Baixar para imprimir</button>
+        <button class="btn ghost" id="cad-clear" type="button">Limpar caderno</button>
+      </div>
+      <div id="caderno-list"></div>
+    </div></section>
+
+    <!-- ============ 9. FLASHCARDS ============ -->
+    <section id="flashcards"><div class="card">
+      <p class="eyebrow">Seção 9 · flashcards</p>
+      <h2 class="sec">Flashcards — revisão diária</h2>
+      <p>Toque no cartão para ver a resposta. Responda em voz alta <em>antes</em> de virar (recuperação ativa).</p>
+      <div class="fctools">
+        <button class="btn ghost" id="fc-shuffle">Embaralhar</button>
+        <button class="btn ghost" id="fc-all">Mostrar/ocultar todas</button>
+        <span class="score" id="fc-count"></span>
+      </div>
+      <div id="fcs" class="weights" style="gap:12px"></div>
+    </div></section>
+
+    <!-- ============ REVISÃO DE VÉSPERA ============ -->
+    <section id="vespera"><div class="card">
+      <p class="eyebrow">Reta final · leia na véspera e na manhã da prova</p>
+      <h2 class="sec">Revisão de véspera — tudo numa folha</h2>
+      <p>Na véspera e na manhã da prova, <strong>não estude matéria nova</strong>. Releia só isto: os mnemônicos, os números que caem e as pegadinhas campeãs. Depois, feche o material e descanse.</p>
+
+      <h3>Mnemônicos que salvam</h3>
+      <ul>
+        <li><strong>CNH 10 · 5 · 3</strong> — validade: 10 anos (até 50), 5 (50–70), 3 (70+).</li>
+        <li><strong>Pontos 3 · 4 · 5 · 7</strong> — leve, média, grave, gravíssima.</li>
+        <li><strong>Suspensão 20 · 30 · 40</strong> — 2+ gravíssimas / 1 gravíssima / nenhuma (em 12 meses).</li>
+        <li><strong>Pessoa &gt; luz &gt; placa &gt; regra</strong> — ordem de prevalência no trânsito.</li>
+        <li><strong>Contran Normatiza · Detran Executa · PRF Patrulha · JARI Julga.</strong></li>
+        <li><strong>LIMPE</strong> — Legalidade, Impessoalidade, Moralidade, Publicidade, Eficiência (art. 37).</li>
+        <li><strong>Crase:</strong> troque por masculino — deu <strong>“ao”</strong> = tem crase.</li>
+        <li><strong>Negar “se p, então q” = “p e não q”</strong>; equivalente = contrapositiva “se não q, então não p”.</li>
+        <li><strong>Energia = v²</strong> — dobrar a velocidade quadruplica a frenagem.</li>
+      </ul>
+
+      <h3>Números e fatos que caem</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Tema</th><th>Número / fato</th></tr></thead>
+        <tbody>
+        <tr><td class="k">Formato da prova (PRF 2021)</td><td>120 itens Certo/Errado · cada erro anula um acerto</td></tr>
+        <tr><td class="k">Blocos</td><td>I (base + Física + Info) · II (Legislação de Trânsito) · III (Direitos)</td></tr>
+        <tr><td class="k">CNH — validade (Lei 14.071/2020)</td><td>10 anos (até 50) · 5 (50–70) · 3 (70+)</td></tr>
+        <tr><td class="k">Pontos por infração</td><td>leve 3 · média 4 · grave 5 · gravíssima 7</td></tr>
+        <tr><td class="k">Suspensão (12 meses)</td><td>20 (2+ gravíssimas) · 30 (1) · 40 (nenhuma)</td></tr>
+        <tr><td class="k">Permissão do novato</td><td>1 ano</td></tr>
+        <tr><td class="k">PRF na Constituição</td><td>art. 144 — segurança pública (rodovias federais)</td></tr>
+        <tr><td class="k">Casa (art. 5º, XI)</td><td>entra sem ordem só em flagrante/desastre/socorro; de dia, com ordem judicial</td></tr>
+        <tr><td class="k">Tentativa (art. 14 CP)</td><td>pena reduzida de 1/3 a 2/3</td></tr>
+        <tr><td class="k">Drogas (Lei 11.343/06)</td><td>usuário (art. 28) não é preso; traficante sim</td></tr>
+        <tr><td class="k">Declaração Universal dos DH</td><td>ONU, 1948</td></tr>
+        <tr><td class="k">Órgãos do trânsito</td><td>Contran normatiza · Detran habilita · DNIT rodovias · PRF patrulha · JARI julga recurso</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>As pegadinhas campeãs (padrão Cebraspe)</h3>
+      <ul>
+        <li><strong>Número trocado:</strong> “grave = 7 pontos” (é 5), “validade 5 anos até 50” (é 10). Decore as tabelas.</li>
+        <li><strong>Verbo trocado entre órgãos:</strong> “a PRF julga recurso” (é a JARI) · “o Detran normatiza” (é o Contran).</li>
+        <li><strong>Esferas independentes:</strong> “foi absolvido no crime, logo não paga multa” = errado.</li>
+        <li><strong>Recusar o bafômetro</strong> NÃO livra de punição — é infração gravíssima (art. 165-A).</li>
+        <li><strong>Direito absoluto:</strong> “os direitos fundamentais são absolutos” = errado (todos têm limites).</li>
+        <li><strong>Negação do condicional:</strong> negar “se p, então q” é “p e não q” — não “se não p…”.</li>
+        <li><strong>“Houveram” não existe</strong> nesse sentido: haver = existir é impessoal → “Houve acidentes”.</li>
+        <li><strong>Posse × porte</strong> de arma; <strong>usuário × traficante</strong> de droga — não confundir.</li>
+        <li><strong>Palavras extremas</strong> (“sempre”, “somente”, “nunca”, “todo”) geralmente deixam o item Errado.</li>
+        <li><strong>Física:</strong> energia depende de <strong>v²</strong>, não de v — dobrar a velocidade quadruplica a frenagem.</li>
+      </ul>
+      <div class="alert red"><span class="tag">Regra de ouro no dia</span> — leia cada item com calma e <b>só marque Certo/Errado quando tiver certeza</b>. Como o erro anula o acerto, <b>na dúvida real deixe em branco</b> (em branco não tira ponto). Nada de chutar no escuro. Reserve tempo para revisar o cartão-resposta.</div>
+    </div></section>
+
+    <!-- ============ 10. FONTES ============ -->
+    <section id="fontes"><div class="card">
+      <p class="eyebrow">Seção 10</p>
+      <h2 class="sec">Fontes oficiais — onde baixar</h2>
+      <p>Estude sempre pela <strong>lei seca atualizada</strong> e pelas provas anteriores da banca. Quando o novo edital sair, baixe-o e confira o conteúdo confirmado.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Material</th><th>Onde</th></tr></thead>
+        <tbody>
+        <tr><td class="k">Edital e provas anteriores (PRF 2021, banca Cebraspe)</td><td>cebraspe.org.br (concursos encerrados) · gov.br/prf</td></tr>
+        <tr><td class="k">Código de Trânsito Brasileiro (Lei 9.503/1997) e Lei 14.071/2020</td><td>planalto.gov.br</td></tr>
+        <tr><td class="k">Resoluções do Contran (sinalização, CNH, infrações)</td><td>gov.br/transportes (Senatran) · gov.br/transitos</td></tr>
+        <tr><td class="k">Constituição, Código Penal, CPP</td><td>planalto.gov.br</td></tr>
+        <tr><td class="k">Legislação especial — Drogas (11.343/06), Armas (10.826/03), Abuso de autoridade (13.869/19), Tortura (9.455/97)</td><td>planalto.gov.br</td></tr>
+        <tr><td class="k">Ética no serviço público (Decreto 1.171/1994)</td><td>planalto.gov.br</td></tr>
+        <tr><td class="k">Direitos Humanos (Declaração Universal, 1948)</td><td>gov.br · ONU</td></tr>
+        <tr><td class="k">Atualidades e geopolítica</td><td>Portais de notícias de referência (economia, segurança, meio ambiente, fronteiras)</td></tr>
+        </tbody>
+      </table></div>
+      <p class="peg">Dica: baixe o CTB e a Lei 14.071/2020 em PDF, marque com marca-texto as tabelas (validade, pontos, suspensão) e refaça-as de memória — é o que mais cai.</p>
+    </div></section>
+
+    <!-- ============ 11. CLAUDE ============ -->
+    <section id="claude"><div class="card">
+      <p class="eyebrow">Seção 11</p>
+      <h2 class="sec">Seu tutor infinito no Claude Code</h2>
+      <p>Este site é o material fixo. Para <strong>itens Certo/Errado ilimitados e correção personalizada</strong>, use o Claude Code como cursinho particular:</p>
+      <ol>
+        <li>Crie uma pasta <code>prf-2026</code> e coloque nela: <code>CLAUDE.md</code>, <code>base_conhecimento_prf.md</code> e uma subpasta <code>leis/</code> com os PDFs (CTB, Lei 14.071/2020, CF, CP, legislação especial).</li>
+        <li>Abra o terminal na pasta e rode <code>claude</code> — o <code>CLAUDE.md</code> ativa o modo tutor.</li>
+        <li>Peça em português: <em>"monte a sessão de hoje"</em>, <em>"15 itens Certo/Errado de CNH e pontuação, depois o gabarito comentado"</em>, <em>"corrija: 1-Certo, 2-Errado…"</em>, <em>"sorteie 20 flashcards de CTB"</em>, <em>"revisão final por prioridade"</em>.</li>
+        <li>O tutor mantém <code>progresso.md</code> e <code>erros.md</code> — peça a atualização ao fim de cada sessão.</li>
+      </ol>
+      <div class="alert blue"><span class="tag">Dica</span> — coloque a lei seca em <code>leis/</code> para o tutor citar artigo e prazo sem inventar. Peça sempre no formato Cebraspe (Certo/Errado) para treinar como a prova cobra.</div>
+    </div></section>
+
+    <footer>
+      Material de estudo · Concurso PRF — Policial Rodoviário Federal · banca Cebraspe · projetado pelo último edital (2021), a ser ajustado quando o novo sair.<br>
+      Confira sempre os dados no edital oficial. Bons estudos e boa prova. 🚔
+    </footer>
+  </main>
+</div>
+<button class="back" id="back" aria-label="Voltar ao topo">↑</button>
+
+<script>
+/* ---------- tema ---------- */
+(function(){
+  var root=document.documentElement, key="dmae:theme";
+  try{var s=localStorage.getItem(key); if(s)root.setAttribute("data-theme",s);}catch(e){}
+  document.getElementById("theme").onclick=function(){
+    var cur=root.getAttribute("data-theme");
+    var dark=cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+    var nx=dark?"light":"dark"; root.setAttribute("data-theme",nx);
+    try{localStorage.setItem(key,nx);}catch(e){}
+  };
+})();
+/* ---------- countdown ---------- */
+(function(){
+  var prova=null; /* PRF: edital do próximo concurso ainda não saiu */ // TROCAR pela data da prova (ano, mês-1, dia)
+  function upd(){var e=document.getElementById("cddays"); if(e)e.textContent=prova?Math.max(0,Math.ceil((prova-new Date())/86400000))+" dias":"edital em breve";}
+  upd();
+})();
+/* ---------- menu mobile + TOC ativo ---------- */
+(function(){
+  var toc=document.getElementById("toc"),mb=document.getElementById("menub");
+  mb.onclick=function(){var o=toc.classList.toggle("open");document.body.classList.toggle("navopen",o);};
+  toc.addEventListener("click",function(e){if(e.target.tagName==="A"){toc.classList.remove("open");document.body.classList.remove("navopen");}});
+  var links=[].slice.call(toc.querySelectorAll("a"));
+  var map={}; links.forEach(function(a){map[a.getAttribute("href").slice(1)]=a;});
+  var obs=new IntersectionObserver(function(en){
+    en.forEach(function(x){ if(x.isIntersecting){ links.forEach(function(a){a.classList.remove("on");}); var a=map[x.target.id]; if(a)a.classList.add("on"); }});
+  },{rootMargin:"-64px 0px -70% 0px"});
+  document.querySelectorAll("section[id]").forEach(function(s){obs.observe(s);});
+  var back=document.getElementById("back");
+  addEventListener("scroll",function(){back.classList.toggle("show",scrollY>600);});
+  back.onclick=function(){scrollTo({top:0,behavior:"smooth"});};
+})();
+/* ---------- plano checklist ---------- */
+(function(){
+  function K(){return window.DMAE_KEY("plano");}
+  function readSt(){try{return JSON.parse(localStorage.getItem(K())||"{}");}catch(e){return{};}}
+  function renderProg(){
+    var boxes=document.querySelectorAll("#diario-list input");
+    var total=boxes.length,done=0;[].forEach.call(boxes,function(c){if(c.checked)done++;});
+    var pct=total?Math.round(done/total*100):0;
+    var el=document.getElementById("crono-prog");
+    if(el)el.innerHTML='<div class="cprow"><span><b>Progresso do plano diário</b></span><span class="cbar"><i style="width:'+pct+'%"></i></span><span>'+done+'/'+total+' dias ('+pct+'%)</span></div>';
+  }
+  window.DMAE_planoApply=function(){
+    var st=readSt();
+    document.querySelectorAll("#plano-list input, #diario-list input").forEach(function(c){
+      var on=!!st[c.id];c.checked=on;c.closest(".chk").classList.toggle("done",on);
+    });
+    renderProg();
+  };
+  document.querySelectorAll("#plano-list input, #diario-list input").forEach(function(c){
+    c.onchange=function(){
+      var st=readSt();st[c.id]=c.checked;try{localStorage.setItem(K(),JSON.stringify(st));}catch(e){}
+      c.closest(".chk").classList.toggle("done",c.checked);renderProg();
+      if(window.DMAE_syncPush)window.DMAE_syncPush();
+    };
+  });
+  var pr=document.getElementById("plano-reset");
+  if(pr)pr.onclick=function(){
+    if(!confirm("Desmarcar todos os dias e semanas do cronograma?"))return;
+    try{localStorage.removeItem(K());}catch(e){}
+    document.querySelectorAll("#plano-list input, #diario-list input").forEach(function(c){c.checked=false;c.closest(".chk").classList.remove("done");});
+    renderProg();
+    if(window.DMAE_syncPush)window.DMAE_syncPush();
+  };
+  window.DMAE_planoApply();
+})();
+
+/* ---------- SIMULADO ---------- */
+var SIM=[
+{b:"Bloco I — Português, RLM, Informática, Física (1–14)"},
+{n:1,t:"(Português) Em “O agente, que estava atento, evitou o acidente”, a oração entre vírgulas é explicativa e pode ser retirada sem mudar o fato de que o agente evitou o acidente.",o:["Certo","Errado"],c:0,e:"É oração adjetiva explicativa (entre vírgulas): dá informação extra. A restritiva (sem vírgulas) limitaria a quais agentes."},
+{n:2,t:"(Português) A frase “Fez-se necessárias várias providências” está correta quanto à concordância.",o:["Certo","Errado"],c:1,e:"O correto é “Fizeram-se necessárias várias providências” (sujeito: várias providências, plural)."},
+{n:3,t:"(Português) Em “Refiro-me à norma”, o uso da crase está correto.",o:["Certo","Errado"],c:0,e:"“Referir-se a” + “a norma” (fem. com artigo) = à. Troca por masc.: “ao regulamento”."},
+{n:4,t:"(RLM) A negação de “Todo policial é honesto” é “Nenhum policial é honesto”.",o:["Certo","Errado"],c:1,e:"A negação de “todo A é B” é “existe pelo menos um A que não é B” (algum policial não é honesto)."},
+{n:5,t:"(RLM) A proposição “Se chove, então a pista fica molhada” é equivalente a “Se a pista não fica molhada, então não chove”.",o:["Certo","Errado"],c:0,e:"É a contrapositiva — sempre equivalente ao condicional original."},
+{n:6,t:"(RLM) A negação de “Se p, então q” é “se não p, então não q”.",o:["Certo","Errado"],c:1,e:"A negação de “se p então q” é “p e não q”."},
+{n:7,t:"(Informática) Worm é um tipo de malware que se propaga sozinho pela rede, sem precisar de um arquivo hospedeiro.",o:["Certo","Errado"],c:0,e:"Diferente do vírus (que precisa de hospedeiro), o worm se autopropaga pela rede."},
+{n:8,t:"(Informática) No Excel, a função =MÉDIA(A1:A10) soma os valores de A1 a A10.",o:["Certo","Errado"],c:1,e:"=MÉDIA calcula a média; quem soma é =SOMA(A1:A10)."},
+{n:9,t:"(Informática) Fazer backup regularmente é uma medida de segurança contra perda de dados por ransomware.",o:["Certo","Errado"],c:0,e:"Backup (de preferência offline) permite recuperar dados sequestrados por ransomware."},
+{n:10,t:"(Física) Se um carro dobra a velocidade, a distância de frenagem também dobra.",o:["Certo","Errado"],c:1,e:"A distância de frenagem depende de v²; dobrar a velocidade a QUADRUPLICA."},
+{n:11,t:"(Física) A força de atrito é o que permite ao pneu frear o veículo na pista.",o:["Certo","Errado"],c:0,e:"O atrito entre pneu e pista gera a força que desacelera o veículo."},
+{n:12,t:"(Ética) No serviço público, um ato pode ser legal e, ainda assim, ser antiético.",o:["Certo","Errado"],c:0,e:"Legalidade e moralidade são distintas; um ato dentro da lei pode ferir a ética."},
+{n:13,t:"(Ética) A impessoalidade exige que o agente público favoreça amigos quando possível.",o:["Certo","Errado"],c:1,e:"Impessoalidade é o oposto: tratar todos igualmente, sem favorecimento."},
+{n:14,t:"(Geopolítica) O Brasil faz fronteira com todos os países da América do Sul, exceto Chile e Equador.",o:["Certo","Errado"],c:0,e:"São os dois únicos países sul-americanos sem fronteira com o Brasil."},
+{b:"Bloco II — Legislação de Trânsito / CTB (15–24)"},
+{n:15,t:"(CTB) Segundo a Lei 14.071/2020, a CNH de um condutor de 30 anos tem validade de 10 anos.",o:["Certo","Errado"],c:0,e:"Validade: 10 anos até 50; 5 anos de 50 a 70; 3 anos com 70+."},
+{n:16,t:"(CTB) A infração gravíssima corresponde a 7 pontos na CNH.",o:["Certo","Errado"],c:0,e:"Leve 3, média 4, grave 5, gravíssima 7 pontos."},
+{n:17,t:"(CTB) O condutor será sempre suspenso ao atingir 20 pontos em 12 meses, independentemente de gravíssimas.",o:["Certo","Errado"],c:1,e:"Após a Lei 14.071: 20 pontos (2+ gravíssimas), 30 (1 gravíssima) ou 40 (nenhuma gravíssima)."},
+{n:18,t:"(CTB) A Polícia Rodoviária Federal integra o Sistema Nacional de Trânsito.",o:["Certo","Errado"],c:0,e:"O SNT inclui Contran, Senatran, Detrans, DNIT, PRF, JARI, entre outros."},
+{n:19,t:"(CTB) Recusar-se a fazer o teste do bafômetro é conduta sem qualquer penalidade administrativa.",o:["Certo","Errado"],c:1,e:"A recusa é infração gravíssima (art. 165-A), com multa multiplicada e suspensão do direito de dirigir."},
+{n:20,t:"(CTB) Compete ao Contran estabelecer as normas regulamentares do trânsito, e à PRF fiscalizar nas rodovias federais.",o:["Certo","Errado"],c:0,e:"Contran normatiza; a PRF fiscaliza e patrulha as rodovias federais."},
+{n:21,t:"(CTB) Na ordem de prevalência, a sinalização (placas) prevalece sobre a ordem do agente de trânsito.",o:["Certo","Errado"],c:1,e:"A ordem é: agente > sinal luminoso > sinalização (placas) > regra de circulação. O agente prevalece."},
+{n:22,t:"(CTB) A Permissão para Dirigir (do condutor novato) tem validade de 1 ano.",o:["Certo","Errado"],c:0,e:"O condutor recebe a permissão por 1 ano antes da CNH definitiva."},
+{n:23,t:"(CTB) Homicídio culposo na direção de veículo é infração administrativa, não crime.",o:["Certo","Errado"],c:1,e:"É crime de trânsito (art. 302 do CTB), com pena de detenção."},
+{n:24,t:"(CTB) A categoria “B” habilita a conduzir motocicleta.",o:["Certo","Errado"],c:1,e:"Motocicleta exige categoria “A”. A “B” é para automóveis."},
+{b:"Bloco III — Direitos e Direitos Humanos (25–34)"},
+{n:25,t:"(Constitucional) A segurança pública é exercida, entre outros, pela Polícia Rodoviária Federal, conforme o art. 144 da CF.",o:["Certo","Errado"],c:0,e:"O art. 144 lista a PRF como órgão de segurança pública, para patrulhamento das rodovias federais."},
+{n:26,t:"(Constitucional) Os direitos fundamentais são absolutos e não admitem qualquer limitação.",o:["Certo","Errado"],c:1,e:"Nenhum direito é absoluto; há limites e ponderação (ex.: liberdade de expressão × honra)."},
+{n:27,t:"(Administrativo) Os princípios expressos da administração pública formam o LIMPE: Legalidade, Impessoalidade, Moralidade, Publicidade e Eficiência.",o:["Certo","Errado"],c:0,e:"Art. 37 da CF."},
+{n:28,t:"(Administrativo) Revogação e anulação são sinônimos.",o:["Certo","Errado"],c:1,e:"Anulação = ato ilegal (efeito retroativo). Revogação = ato legal, mas inconveniente/inoportuno (efeito futuro)."},
+{n:29,t:"(Penal) Na legítima defesa, o agente repele injusta agressão, atual ou iminente, a direito seu ou de outrem.",o:["Certo","Errado"],c:0,e:"Definição do art. 25 do Código Penal."},
+{n:30,t:"(Penal) Crime tentado é punido com a mesma pena do crime consumado.",o:["Certo","Errado"],c:1,e:"Na tentativa a pena é reduzida de 1/3 a 2/3."},
+{n:31,t:"(Proc. Penal) A prisão em flagrante pode ser realizada por qualquer pessoa do povo.",o:["Certo","Errado"],c:0,e:"Flagrante facultativo (qualquer um pode) e obrigatório (autoridade e agentes)."},
+{n:32,t:"(Leg. Especial) Porte e posse de arma de fogo são a mesma coisa.",o:["Certo","Errado"],c:1,e:"Posse = manter em casa/trabalho; porte = trazer consigo fora desses locais. São condutas distintas."},
+{n:33,t:"(Direitos Humanos) Os direitos humanos aplicam-se a todas as pessoas e orientam a conduta do policial.",o:["Certo","Errado"],c:0,e:"DH são universais e norteiam a atuação policial (uso proporcional da força etc.)."},
+{n:34,t:"(Leg. Especial) Segundo a Lei de Drogas, o usuário está sujeito às mesmas penas privativas de liberdade do traficante.",o:["Certo","Errado"],c:1,e:"O usuário (art. 28) não recebe pena de prisão; sofre medidas como advertência e serviços à comunidade."}
+];
+/* Painel "Revise seus erros" — usado por todos os simulados e treinos */
+window.renderErrPanel=function(host,anchorEl,errors,total){
+  var id=host.id+"-errpanel";
+  var old=document.getElementById(id); if(old)old.parentNode.removeChild(old);
+  var d=document.createElement("div"); d.className="errpanel"; d.id=id;
+  if(!errors.length){
+    d.className+=" zero";
+    d.innerHTML='<h4>Você não errou nenhuma! 🎉</h4><p>Acertou todas as '+total+'. Refaça daqui a alguns dias sem olhar — se continuar acertando, está fixado.</p>';
+  } else {
+    var lis=errors.map(function(e){
+      return '<li><a href="#'+e.anchor+'">Questão '+e.n+'</a> — você marcou <b class="you">'+(e.you||'em branco')+'</b>; a certa é <b class="ok">'+e.correct+'</b>.'
+        +'<div class="eq">"'+e.qt+'"</div>'
+        +'<div class="ei"><b>Entenda o porquê:</b> '+e.expl+'</div></li>';
+    }).join("");
+    d.innerHTML='<h4>Revise seus erros — '+errors.length+' de '+total+'</h4>'
+      +'<p><b>Não passe reto:</b> leia o porquê de cada uma. É entendendo o motivo (não decorando a letra) que você fixa na memória e reconhece a mesma pegadinha na prova. Clique no número para reler a questão inteira.</p>'
+      +'<ol>'+lis+'</ol>'
+      +'<p class="tip">Anote cada erro no seu caderno de erros: o que errou · a regra certa · como não repetir. Revise esse caderno em 24 h, 7 dias e 21 dias.</p>';
+  }
+  anchorEl.parentNode.insertBefore(d,anchorEl.nextSibling);
+  d.scrollIntoView({behavior:"smooth",block:"nearest"});
+  return d;
+};
+
+/* Cronômetro de prova (treina o ritmo das 3 h) */
+window.attachTimer=function(simbar,minutes){
+  if(!simbar||simbar.querySelector(".timer"))return;
+  var total=minutes*60,left=total,iv=null;
+  function two(n){return(n<10?"0":"")+n;}
+  function fmt(s){var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return h>0?h+":"+two(m)+":"+two(x):m+":"+two(x);}
+  var wrap=document.createElement("span");wrap.className="timer";
+  var disp=document.createElement("b");disp.className="tdisp";
+  var start=document.createElement("button");start.type="button";start.className="btn ghost tbtn2";start.textContent="▶ Cronômetro";
+  var reset=document.createElement("button");reset.type="button";reset.className="btn ghost tbtn2";reset.textContent="Zerar";reset.style.display="none";
+  function paint(){disp.textContent="⏱ "+fmt(left);disp.classList.toggle("low",left<=300);}
+  function stop(){if(iv){clearInterval(iv);iv=null;}start.textContent="▶ Retomar";}
+  function tick(){left--;if(left<=0){left=0;stop();disp.textContent="⏱ Tempo esgotado";disp.classList.add("low");return;}paint();}
+  paint();
+  start.onclick=function(){if(iv){stop();return;}if(left<=0)left=total;iv=setInterval(tick,1000);start.textContent="⏸ Pausar";reset.style.display="";};
+  reset.onclick=function(){stop();left=total;paint();start.textContent="▶ Cronômetro";};
+  wrap.appendChild(disp);wrap.appendChild(start);wrap.appendChild(reset);
+  simbar.appendChild(wrap);
+};
+
+/* Histórico de desempenho (salvo no navegador) */
+window.recordScore=function(key,label,pct,ac,total,pts,mp,bymat){
+  var K=window.DMAE_KEY("scores"),arr=[];
+  try{arr=JSON.parse(localStorage.getItem(K)||"[]");}catch(e){}
+  function two2(n){return(n<10?"0":"")+n;}
+  var d=new Date();
+  var rec={k:key,l:label,p:pct,a:ac,n:total,d:two2(d.getDate())+"/"+two2(d.getMonth()+1)};
+  if(pts!=null){rec.pt=pts;rec.mp=mp;}
+  if(bymat)rec.m=bymat;
+  arr.push(rec);
+  if(arr.length>40)arr=arr.slice(-40);
+  try{localStorage.setItem(K,JSON.stringify(arr));}catch(e){}
+  if(window.renderDesempenho)window.renderDesempenho();
+  if(window.renderProxima)window.renderProxima();
+  if(window.DMAE_syncPush)window.DMAE_syncPush();
+};
+/* agrega acerto por matéria a partir do histórico */
+window.DMAE_fraca=function(scores){
+  var agg={};(scores||[]).forEach(function(s){if(s.m){for(var k in s.m){agg[k]=agg[k]||{ok:0,tot:0};agg[k].ok+=s.m[k].ok;agg[k].tot+=s.m[k].tot;}}});
+  var ks=Object.keys(agg).filter(function(k){return agg[k].tot>=3;});
+  if(!ks.length)return null;
+  ks.sort(function(a,b){return (agg[a].ok/agg[a].tot)-(agg[b].ok/agg[b].tot);});
+  return {mat:ks[0],pct:Math.round(agg[ks[0]].ok/agg[ks[0]].tot*100)};
+};
+/* recomendação personalizada "Sua próxima ação" */
+window.renderProxima=function(){
+  var host=document.getElementById("proxima");if(!host)return;
+  var scores=[],cad=[];
+  try{scores=JSON.parse(localStorage.getItem(window.DMAE_KEY("scores"))||"[]");}catch(e){}
+  try{cad=JSON.parse(localStorage.getItem(window.DMAE_KEY("cadernoerros"))||"[]");}catch(e){}
+  var txt,href,bt;
+  if(!scores.length){
+    txt="Faça o <b>Simulado 1</b> cronometrado, <b>sem estudar antes</b>. É o diagnóstico: mostra onde você está mais fraco e já enche seu caderno de erros.";
+    href="#simulado";bt="Fazer o Simulado 1 →";
+  } else if(cad.length>0){
+    txt="Você tem <b>"+cad.length+"</b> quest"+(cad.length>1?"ões":"ão")+" no seu <b>caderno de erros</b>. Refazer o próprio erro é o que mais fixa — comece por aí.";
+    href="#caderno";bt="Abrir meu caderno →";
+  } else {
+    txt="Sem erros pendentes! Reforce a matéria que mais pesa: treine <b>Só Legislação de Trânsito (CTB)</b>.";
+    href="#especifico";bt="Treinar CTB →";
+  }
+  var f=window.DMAE_fraca(scores),foco="";
+  if(f)foco='<p class="foco">🎯 Sua matéria mais fraca até agora: <b>'+f.mat+'</b> ('+f.pct+'% de acerto). Dê atenção extra a ela.</p>';
+  host.innerHTML='<h4>Sua próxima ação</h4><p>'+txt+'</p><a class="btn" href="'+href+'">'+bt+'</a>'+foco;
+  host.hidden=false;
+};
+window.renderDesempenho=function(){
+  var host=document.getElementById("desempenho");if(!host)return;
+  var arr=[];try{arr=JSON.parse(localStorage.getItem(window.DMAE_KEY("scores"))||"[]");}catch(e){}
+  if(!arr.length){host.innerHTML='<p class="dhint">Faça um simulado e clique em <b>Corrigir</b>: suas notas ficam salvas aqui para você acompanhar a evolução.</p>';return;}
+  var best={},bpt={},bmp={};arr.forEach(function(s){if(best[s.l]==null||s.p>best[s.l])best[s.l]=s.p;if(s.pt!=null&&(bpt[s.l]==null||s.pt>bpt[s.l])){bpt[s.l]=s.pt;bmp[s.l]=s.mp;}});
+  var bestHTML=Object.keys(best).map(function(l){
+    if(bpt[l]!=null){var ok=bpt[l]>=25;return '<span class="dchip">'+l+': <b>'+bpt[l]+'/'+bmp[l]+' pts</b> '+(ok?'✅':'⚠️')+'</span>';}
+    return '<span class="dchip">'+l+': <b>'+best[l]+'%</b></span>';
+  }).join("");
+  var last=arr.slice(-6).reverse().map(function(s){var nota=s.pt!=null?(s.pt+'/'+s.mp+' pts · '+s.p+'%'):(s.a+'/'+s.n+' ('+s.p+'%)');return '<li>'+s.d+' · '+s.l+' — <b>'+nota+'</b></li>';}).join("");
+  var f=window.DMAE_fraca?window.DMAE_fraca(arr):null;
+  var focoD=f?'<p class="dhint" style="margin:0 0 8px">🎯 Matéria mais fraca: <b>'+f.mat+'</b> ('+f.pct+'%) — foque nela.</p>':'';
+  host.innerHTML='<div class="dbest"><span class="dlbl">Melhor nota:</span> '+bestHTML+'</div>'+focoD+'<p class="dhint" style="margin:0 0 8px">Acompanhe a evolução das suas notas por simulado. Na PRF, o que vale é o <b>líquido</b> (certos − errados).</p><ol class="dlast">'+last+'</ol><button class="btn ghost dclear" type="button">Limpar histórico</button>';
+  host.querySelector(".dclear").onclick=function(){try{localStorage.removeItem(window.DMAE_KEY("scores"));}catch(e){}window.renderDesempenho();};
+};
+
+(function(){
+  var box=document.getElementById("sim"),html="";
+  SIM.forEach(function(q,i){
+    if(q.b){html+='<div class="blocklabel">'+q.b+'</div>';}
+    if(q.passage){html+='<div class="passage">'+q.passage+'</div>';}
+    if(q.n){
+      html+='<div class="q" data-i="'+i+'" id="simq'+q.n+'"><div class="qn">Questão '+q.n+'</div><div class="qt">'+q.t+'</div>';
+      var ce=q.o.length<=2;
+      q.o.forEach(function(txt,j){
+        html+='<label class="opt"><input type="radio" name="q'+q.n+'" value="'+j+'">'+(ce?'':'<span class="lt">'+"ABCD"[j]+')</span>')+'<span>'+txt+'</span></label>';
+      });
+      html+='<div class="expl"><b>Gabarito: '+(ce?q.o[q.c]:"ABCD"[q.c]+'.')+'</b> '+q.e+'</div></div>';
+    }
+  });
+  box.innerHTML=html;
+  var total=SIM.filter(function(q){return q.n;}).length;
+  window.__SIM1=SIM.filter(function(q){return q.t;}).map(function(q){return {t:q.t,o:q.o,c:q.c,e:q.e};});
+
+  var LT="ABCD".split("");
+  document.getElementById("corrigir").onclick=function(){
+    var acertos=0, errs=[], cadErrs=[], pts=0, maxpts=0, byMat={}, curMat="";
+    SIM.forEach(function(q){
+      if(q.b){curMat=q.b.replace(/\s*\(.*\)\s*/,"");return;}
+      if(!q.n)return;
+      var qd=document.getElementById('simq'+q.n);
+      if(!qd)return;
+      var opts=qd.querySelectorAll('.opt');
+      var sel=qd.querySelector('input:checked');
+      opts.forEach(function(o){o.classList.remove('right','wrong');});
+      opts[q.c].classList.add('right');
+      var acertou=false;
+      if(sel){var v=+sel.value; if(v===q.c){acertos++;acertou=true;} else {opts[v].classList.add('wrong');}}
+      qd.querySelector('.expl').classList.add('show');
+      var w=/específ/i.test(curMat)?2:1; maxpts+=w; byMat[curMat]=byMat[curMat]||{ok:0,tot:0}; byMat[curMat].tot++;
+      if(acertou){pts+=w;byMat[curMat].ok++;}
+      if(!acertou){
+        errs.push({n:q.n,anchor:'simq'+q.n,qt:q.t,you:sel?LT[+sel.value]:'',correct:LT[q.c],expl:q.e});
+        cadErrs.push({label:"Simulado 1",t:q.t,o:q.o,c:q.c,e:q.e});
+      }
+    });
+    var pct=Math.round(acertos/total*100);
+    var erradas=errs.filter(function(x){return x.you;}).length; var brancos=total-acertos-erradas; var liq=acertos-erradas;
+    document.getElementById("scorebox").innerHTML='Acertos: <b>'+acertos+'</b> · Erros: <b>'+erradas+'</b> · Em branco: '+brancos+'.<br><b>Líquido (padrão Cebraspe: certos − errados) = '+liq+'</b>. Cada erro anula um acerto — na dúvida real, deixe em branco.';
+    window.renderErrPanel(document.getElementById("simulado"),document.querySelector("#simulado .simbar"),errs,total);
+    window.recordScore("sim1","Simulado 1",pct,acertos,total,null,null,byMat);
+    if(window.saveErrors)window.saveErrors(cadErrs);
+  };
+  document.getElementById("limpar").onclick=function(){
+    box.querySelectorAll('input:checked').forEach(function(i){i.checked=false;});
+    box.querySelectorAll('.opt').forEach(function(o){o.classList.remove('right','wrong');});
+    box.querySelectorAll('.expl').forEach(function(e){e.classList.remove('show');});
+    document.getElementById("scorebox").textContent='';
+    var ep=document.getElementById("simulado-errpanel"); if(ep)ep.parentNode.removeChild(ep);
+  };
+  window.attachTimer(document.querySelector("#simulado .simbar"),180);
+})();
+if(window.renderDesempenho)window.renderDesempenho();
+if(window.renderProxima)window.renderProxima();
+
+/* ---------- FLASHCARDS ---------- */
+var FC=[
+["Formato da prova PRF (Cebraspe)","120 itens Certo/Errado; cada erro anula um acerto."],
+["Blocos da objetiva","I = 55 (base+Física+Info), II = 30 (Trânsito), III = 35 (Direitos)."],
+["Onde está a PRF na Constituição?","Art. 144 — órgão de segurança pública (rodovias federais)."],
+["Validade da CNH (Lei 14.071/2020)","10 anos até 50; 5 de 50 a 70; 3 com 70+."],
+["Pontos por infração","Leve 3, média 4, grave 5, gravíssima 7."],
+["Limite de pontos p/ suspensão","20 (2+ gravíssimas), 30 (1), 40 (nenhuma), em 12 meses."],
+["Quem normatiza o trânsito?","O Contran (regras nacionais)."],
+["Quem julga recurso de multa?","A JARI (1ª instância administrativa)."],
+["Recusar bafômetro","Infração gravíssima (art. 165-A) + suspensão."],
+["Infração x crime de trânsito","Infração = administrativa; crime (arts. 302+) = penal. Independentes."],
+["Permissão do novato","Válida por 1 ano, antes da CNH definitiva."],
+["Ordem de prevalência","Agente > sinal luminoso > placas > regra de circulação."],
+["Negação de 'se p então q'","'p e não q' (não é 'se não p...')."],
+["Equivalente de 'se p então q'","Contrapositiva: 'se não q então não p'."],
+["Vírus x worm","Vírus precisa de hospedeiro; worm se autopropaga pela rede."],
+["Ransomware","Criptografa/sequestra dados e pede resgate; defesa: backup offline."],
+["Energia cinética","Ec = m·v²/2 (depende de v²): dobrar v quadruplica a frenagem."],
+["LIMPE","Legalidade, Impessoalidade, Moralidade, Publicidade, Eficiência (art. 37)."],
+["Anulação x revogação","Anula ato ilegal (retroage); revoga ato legal inoportuno (efeito futuro)."],
+["Legítima defesa","Repelir injusta agressão, atual ou iminente, a direito próprio ou de outrem."],
+["Tentativa (pena)","Reduzida de 1/3 a 2/3 em relação ao consumado."],
+["Posse x porte de arma","Posse = em casa/trabalho; porte = trazer consigo fora desses locais."],
+["Usuário x traficante (drogas)","Usuário (art. 28) não é preso; medidas educativas."],
+["Prisão em flagrante","Independe de mandado; qualquer pessoa pode (autoridade deve)."],
+["Prisão preventiva","Só por decisão judicial."],
+["Casa asilo inviolável","Entra sem ordem só em flagrante, desastre ou socorro; de dia, com ordem judicial."],
+["Uso da força","Legalidade, necessidade, proporcionalidade, moderação."],
+["Estratégia Cebraspe","Na dúvida real, deixe em branco (não anula). Cuidado com 'sempre/somente'."]
+];
+(function(){
+  var box=document.getElementById("fcs"),order=FC.map(function(_,i){return i;});
+  function render(){
+    box.innerHTML=order.map(function(idx,pos){
+      return '<div class="fc" data-i="'+idx+'"><div class="fn">Flashcard '+(pos+1)+'</div><div class="fq">'+FC[idx][0]+'</div><div class="fa">'+FC[idx][1]+'</div><div class="hint">toque para ver a resposta</div></div>';
+    }).join("");
+    document.getElementById("fc-count").textContent=FC.length+" cartões";
+  }
+  render();
+  box.addEventListener("click",function(e){var c=e.target.closest(".fc");if(c)c.classList.toggle("open");});
+  document.getElementById("fc-shuffle").onclick=function(){for(var i=order.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=order[i];order[i]=order[j];order[j]=t;}render();};
+  var allOpen=false;
+  document.getElementById("fc-all").onclick=function(){allOpen=!allOpen;box.querySelectorAll(".fc").forEach(function(c){c.classList.toggle("open",allOpen);});};
+})();
+</script>
+<script>
+/* ===== Motor genérico de provas/treinos (aula + questões + correção) ===== */
+(function(){
+  var L="ABCD".split("");
+  function qHTML(q,n){
+    var h='<div class="q" data-c="'+q.c+'"><div class="qn">'+(q.label?q.label:('Questão '+n))+'</div><div class="qt">'+q.t+'</div>';
+    var ce=q.o.length<=2;
+    for(var j=0;j<q.o.length;j++){h+='<label class="opt"><input type="radio">'+(ce?'':'<span class="lt">'+L[j]+')</span>')+'<span>'+q.o[j]+'</span></label>';}
+    h+='<div class="expl"><b>Gabarito: '+(ce?q.o[q.c]:L[q.c]+'.')+'</b> '+q.e+'</div></div>';
+    return h;
+  }
+  function wire(host){
+    var qs=[].slice.call(host.querySelectorAll(".q"));
+    qs.forEach(function(qd,i){qd.id=host.id+"_q"+(i+1);[].forEach.call(qd.querySelectorAll("input"),function(inp){inp.name=host.id+"_"+i;});});
+    var mats=[],curMat="";
+    [].forEach.call(host.children,function(ch){
+      if(ch.classList&&ch.classList.contains("blocklabel"))curMat=ch.textContent.replace(/\s*\(.*\)\s*/,"");
+      else if(ch.classList&&ch.classList.contains("q"))mats.push(curMat);
+    });
+    var structured=false;
+    var b=document.createElement("div"); b.className="simbar";
+    b.innerHTML='<button class="btn cor">Corrigir</button><button class="btn ghost lim">Limpar</button><span class="score sc" aria-live="polite"></span>';
+    host.appendChild(b);
+    var isSim=host.id.indexOf("quiz-")===0;
+    var simLabel=host.id==="quiz-aleatorio"?"Simulado aleatório":"Simulado "+host.id.replace("quiz-sim","");
+    if(isSim)window.attachTimer(b,180);
+    b.querySelector(".cor").onclick=function(){
+      var ac=0, errs=[], cadErrs=[], pts=0, maxpts=0, byMat={};
+      var card=host.closest(".card"), cardh3=card&&card.querySelector("h3");
+      var lbl=isSim?simLabel:(cardh3?cardh3.textContent.replace("Aula + treino: ",""):"Treino");
+      qs.forEach(function(qd,i){
+        var opts=qd.querySelectorAll(".opt"), ins=qd.querySelectorAll("input"), c=+qd.getAttribute("data-c");
+        var sel=qd.querySelector("input:checked");
+        [].forEach.call(opts,function(o){o.classList.remove("right","wrong");});
+        if(opts[c])opts[c].classList.add("right");
+        var acertou=false, v=-1;
+        if(sel){v=[].indexOf.call(ins,sel); if(v===c){ac++;acertou=true;} else if(opts[v])opts[v].classList.add("wrong");}
+        qd.querySelector(".expl").classList.add("show");
+        var mk=mats[i]||"?";byMat[mk]=byMat[mk]||{ok:0,tot:0};byMat[mk].tot++;if(acertou){byMat[mk].ok++;}
+        if(!acertou){
+          var expl=qd.querySelector(".expl").innerHTML.replace(/^\s*<b>.*?<\/b>\s*/,"");
+          errs.push({n:i+1,anchor:qd.id,qt:qd.querySelector(".qt").innerHTML,you:v>=0?L[v]:"",correct:L[c],expl:expl});
+          var oarr=[].map.call(opts,function(o){var sp=o.querySelectorAll("span");return sp[sp.length-1].innerHTML;});
+          cadErrs.push({label:lbl,t:qd.querySelector(".qt").innerHTML,o:oarr,c:c,e:expl});
+        }
+      });
+      var pct=Math.round(ac/qs.length*100);
+      var liq=ac-(qs.length-ac);
+      var msg=pct>=70?"Ótimo!":pct>=50?"Bom — revise os erros abaixo.":"Releia a aula e veja os erros abaixo.";
+      b.querySelector(".sc").innerHTML="Acertos: <b>"+ac+"</b>/"+qs.length+" ("+pct+"%) · líquido (padrão Cebraspe) <b>"+liq+"</b>. "+msg;
+      window.renderErrPanel(host,b,errs,qs.length);
+      if(isSim)window.recordScore(host.id,simLabel,pct,ac,qs.length,null,null,byMat);
+      if(host.id!=="caderno-list"&&window.saveErrors)window.saveErrors(cadErrs);
+    };
+    b.querySelector(".lim").onclick=function(){
+      host.querySelectorAll("input:checked").forEach(function(i){i.checked=false;});
+      host.querySelectorAll(".opt").forEach(function(o){o.classList.remove("right","wrong");});
+      host.querySelectorAll(".expl").forEach(function(e){e.classList.remove("show");});
+      b.querySelector(".sc").textContent="";
+      var ep=document.getElementById(host.id+"-errpanel"); if(ep)ep.parentNode.removeChild(ep);
+    };
+  }
+  function mountList(host,items){ // items: {b},{passage},{t,o,c,e}
+    var h="",n=0;
+    items.forEach(function(q){
+      if(q.b)h+='<div class="blocklabel">'+q.b+'</div>';
+      if(q.passage)h+='<div class="passage">'+q.passage+'</div>';
+      if(q.t){n++;h+=qHTML(q,n);}
+    });
+    host.innerHTML=h; wire(host);
+  }
+  function mountQs(host,qs){var h="";qs.forEach(function(q,i){h+=qHTML(q,i+1);});host.innerHTML=h;wire(host);}
+
+  /* ===== Caderno de erros (salvo no navegador) ===== */
+  window.saveErrors=function(list){
+    if(!list||!list.length)return;
+    var K=window.DMAE_KEY("cadernoerros"),arr=[];
+    try{arr=JSON.parse(localStorage.getItem(K)||"[]");}catch(e){}
+    var seen={};arr.forEach(function(x){seen[x.id]=1;});
+    list.forEach(function(it){
+      var id=it.label+"§"+it.t;
+      if(!seen[id]){arr.push({id:id,label:it.label,t:it.t,o:it.o,c:it.c,e:it.e});seen[id]=1;}
+    });
+    if(arr.length>200)arr=arr.slice(-200);
+    try{localStorage.setItem(K,JSON.stringify(arr));}catch(e){}
+    if(window.renderCaderno)window.renderCaderno();
+    if(window.DMAE_syncPush)window.DMAE_syncPush();
+  };
+  window.renderCaderno=function(){
+    var host=document.getElementById("caderno-list");if(!host)return;
+    var arr=[];try{arr=JSON.parse(localStorage.getItem(window.DMAE_KEY("cadernoerros"))||"[]");}catch(e){}
+    var cnt=document.getElementById("cad-count");if(cnt)cnt.textContent=arr.length?("· "+arr.length):"";
+    if(!arr.length){host.innerHTML='<p class="dhint">Seu caderno está vazio. Assim que você errar questões nos simulados ou treinos, elas aparecem aqui para você refazer.</p>';if(window.renderProxima)window.renderProxima();return;}
+    mountQs(host,arr);
+    if(window.renderProxima)window.renderProxima();
+  };
+  (function(){
+    var rm=document.getElementById("cad-remove"),cl=document.getElementById("cad-clear");
+    if(rm)rm.onclick=function(){
+      var arr=[];try{arr=JSON.parse(localStorage.getItem(window.DMAE_KEY("cadernoerros"))||"[]");}catch(e){}
+      var qs=document.querySelectorAll("#caderno-list .q");
+      if(!arr.length||qs.length!==arr.length){window.renderCaderno();return;}
+      var keep=[];
+      [].forEach.call(qs,function(qd,i){
+        var ins=qd.querySelectorAll("input"),sel=qd.querySelector("input:checked");
+        var ok=sel&&[].indexOf.call(ins,sel)===+qd.getAttribute("data-c");
+        if(!ok)keep.push(arr[i]);
+      });
+      try{localStorage.setItem(window.DMAE_KEY("cadernoerros"),JSON.stringify(keep));}catch(e){}
+      window.renderCaderno();
+      if(window.DMAE_syncPush)window.DMAE_syncPush();
+      var host=document.getElementById("caderno");if(host)host.scrollIntoView({behavior:"smooth",block:"start"});
+    };
+    if(cl)cl.onclick=function(){
+      if(!confirm("Apagar todas as questões do caderno de erros?"))return;
+      try{localStorage.removeItem(window.DMAE_KEY("cadernoerros"));}catch(e){}
+      window.renderCaderno();
+      if(window.DMAE_syncPush)window.DMAE_syncPush();
+    };
+    var dl=document.getElementById("cad-download");
+    if(dl)dl.onclick=function(){
+      var arr=[];try{arr=JSON.parse(localStorage.getItem(window.DMAE_KEY("cadernoerros"))||"[]");}catch(e){}
+      if(!arr.length){alert("Seu caderno está vazio — faça um simulado ou treino primeiro.");return;}
+      var LL="ABCD".split("");
+      var body=arr.map(function(q,i){
+        var opts=q.o.map(function(o,j){return '<div>'+LL[j]+') '+o+'</div>';}).join("");
+        return '<div class="q"><p><b>'+(i+1)+'. ['+q.label+']</b> '+q.t+'</p><div class="o">'+opts+'</div><div class="a"><b>Gabarito: '+LL[q.c]+'.</b> '+q.e+'</div></div>';
+      }).join("");
+      var html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Caderno de erros - DMAE 2026</title>'
+        +'<style>body{font-family:Arial,Helvetica,sans-serif;max-width:820px;margin:24px auto;padding:0 18px;color:#111;line-height:1.5}'
+        +'h1{font-size:20px} .q{border-bottom:1px solid #ccc;padding:12px 0} .o div{margin:2px 0} '
+        +'.a{background:#eef2f4;padding:8px 10px;border-radius:6px;margin-top:6px;font-size:14px}</style></head>'
+        +'<body><h1>Meu caderno de erros — DMAE 2026 ('+arr.length+' questões)</h1>'
+        +'<p>Refaça cada uma tapando o gabarito; leia a explicação só depois de responder.</p>'+body+'</body></html>';
+      try{
+        var blob=new Blob([html],{type:"text/html;charset=utf-8"});
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement("a");a.href=url;a.download="caderno-de-erros-dmae.html";
+        document.body.appendChild(a);a.click();document.body.removeChild(a);
+        setTimeout(function(){URL.revokeObjectURL(url);},3000);
+      }catch(e){alert("Não foi possível baixar neste navegador.");}
+    };
+    window.renderCaderno();
+  })();
+
+  /* ===================== SIMULADO 2 ===================== */
+  var SIM2=[
+{b:"Bloco I (1–8)"},
+{t:"Na Cebraspe, um item que contém uma parte correta e uma parte incorreta deve ser julgado CERTO.",o:["Certo","Errado"],c:1,e:"Se qualquer parte estiver errada, o item inteiro é ERRADO."},
+{t:"(Português) “A gente vamos resolver” está de acordo com a norma-padrão.",o:["Certo","Errado"],c:1,e:"“A gente” concorda no singular: “a gente vai resolver”."},
+{t:"(Português) Reescrever “Embora estivesse cansado, trabalhou” como “Estava cansado, portanto trabalhou” mantém o sentido.",o:["Certo","Errado"],c:1,e:"“Embora” é concessão; “portanto” é conclusão — muda totalmente o sentido."},
+{t:"(RLM) Se “nenhum A é B”, então “nenhum B é A”.",o:["Certo","Errado"],c:0,e:"A negativa universal é simétrica."},
+{t:"(RLM) Em um grupo, se todos que passaram estudaram, então quem não estudou não passou.",o:["Certo","Errado"],c:0,e:"É a contrapositiva de “passou → estudou”."},
+{t:"(Informática) Phishing é uma técnica de engenharia social para enganar o usuário e roubar dados.",o:["Certo","Errado"],c:0,e:"Phishing induz a pessoa a fornecer credenciais/dados."},
+{t:"(Física) A quantidade de movimento se conserva em uma colisão entre dois veículos (sistema isolado).",o:["Certo","Errado"],c:0,e:"Conservação da quantidade de movimento."},
+{t:"(Ética) Publicidade, no serviço público, significa dar transparência aos atos, salvo sigilo legal.",o:["Certo","Errado"],c:0,e:"O princípio da publicidade exige transparência, com exceções legais."},
+{b:"Bloco II — Trânsito (9–16)"},
+{t:"(CTB) O trânsito de veículos nas vias terrestres abertas à circulação é regido pelo Código de Trânsito Brasileiro.",o:["Certo","Errado"],c:0,e:"Art. 1º do CTB."},
+{t:"(CTB) É de competência do Detran normatizar (criar as regras nacionais) o trânsito.",o:["Certo","Errado"],c:1,e:"Quem normatiza é o Contran; o Detran executa/fiscaliza no estado."},
+{t:"(CTB) A infração média corresponde a 4 pontos.",o:["Certo","Errado"],c:0,e:"Leve 3, média 4, grave 5, gravíssima 7."},
+{t:"(CTB) Dirigir sob influência de álcool é infração gravíssima e também pode ser crime, conforme a concentração/estado.",o:["Certo","Errado"],c:0,e:"Art. 165 (infração) e art. 306 (crime), a depender do caso."},
+{t:"(CTB) A cassação da CNH e a suspensão do direito de dirigir são a mesma penalidade.",o:["Certo","Errado"],c:1,e:"Suspensão é temporária; cassação retira a CNH (mais grave)."},
+{t:"(CTB) O agente da PRF pode fiscalizar o trânsito nas rodovias e estradas federais.",o:["Certo","Errado"],c:0,e:"Competência da PRF no patrulhamento das rodovias federais."},
+{t:"(CTB) Ultrapassar em local proibido (faixa contínua) é permitido se não houver outro veículo.",o:["Certo","Errado"],c:1,e:"É infração independentemente de haver outro veículo."},
+{t:"(CTB) O uso do cinto de segurança é obrigatório para todos os ocupantes do veículo.",o:["Certo","Errado"],c:0,e:"Regra do CTB para condutor e passageiros."},
+{b:"Bloco III — Direitos (17–24)"},
+{t:"(Constitucional) A CF adota a dignidade da pessoa humana como um de seus fundamentos.",o:["Certo","Errado"],c:0,e:"Art. 1º, III, da CF."},
+{t:"(Constitucional) O habeas corpus protege o direito de locomoção.",o:["Certo","Errado"],c:0,e:"HC tutela a liberdade de ir e vir."},
+{t:"(Administrativo) O poder de polícia permite à administração limitar direitos em favor do interesse público.",o:["Certo","Errado"],c:0,e:"Definição do poder de polícia."},
+{t:"(Administrativo) Ato discricionário é aquele em que a lei não deixa margem de escolha ao administrador.",o:["Certo","Errado"],c:1,e:"Discricionário admite juízo de conveniência/oportunidade; vinculado é sem margem."},
+{t:"(Penal) Estado de necessidade e legítima defesa são a mesma excludente de ilicitude.",o:["Certo","Errado"],c:1,e:"São excludentes distintas (arts. 24 e 25 do CP)."},
+{t:"(Proc. Penal) A prisão preventiva pode ser decretada por autoridade policial, sem juiz.",o:["Certo","Errado"],c:1,e:"Preventiva depende de decisão judicial; a polícia representa/solicita."},
+{t:"(Leg. Especial) O Estatuto do Desarmamento é a Lei 10.826/2003.",o:["Certo","Errado"],c:0,e:"Regula posse, porte e registro de armas."},
+{t:"(Direitos Humanos) O uso da força pelo policial deve ser proporcional e necessário.",o:["Certo","Errado"],c:0,e:"Princípios de legalidade, necessidade e proporcionalidade no uso da força."}
+];
+  mountList(document.getElementById("quiz-sim2"),SIM2);
+
+  /* ===================== SIMULADO 3 ===================== */
+  var SIM3=[
+{b:"Bloco I (1–6)"},
+{t:"(Português) A vírgula pode separar o sujeito do seu verbo quando o sujeito é longo.",o:["Certo","Errado"],c:1,e:"Nunca se separa sujeito do verbo por vírgula, por mais longo que seja."},
+{t:"(RLM) “Ou chove ou faz sol” é uma disjunção exclusiva: não ocorrem as duas ao mesmo tempo.",o:["Certo","Errado"],c:0,e:"“Ou...ou” exclusivo: exatamente uma das duas."},
+{t:"(RLM) Se um conjunto A tem 3 elementos, o número de subconjuntos de A é 8.",o:["Certo","Errado"],c:0,e:"2³ = 8 subconjuntos."},
+{t:"(Informática) HTTPS indica que a conexão com o site é criptografada.",o:["Certo","Errado"],c:0,e:"O “S” de HTTPS = camada de segurança (TLS)."},
+{t:"(Física) A energia cinética de um veículo depende linearmente da sua velocidade.",o:["Certo","Errado"],c:1,e:"Ec = m·v²/2 — depende do quadrado da velocidade."},
+{t:"(Ética) A moralidade administrativa exige do agente conduta honesta e de boa-fé.",o:["Certo","Errado"],c:0,e:"Moralidade = probidade e boa-fé no trato da coisa pública."},
+{b:"Bloco II — Trânsito (7–14)"},
+{t:"(CTB) A validade da CNH para um condutor de 68 anos é de 5 anos.",o:["Certo","Errado"],c:0,e:"De 50 a 70 anos: 5 anos (Lei 14.071/2020)."},
+{t:"(CTB) A infração leve corresponde a 5 pontos.",o:["Certo","Errado"],c:1,e:"Leve = 3 pontos. Grave = 5."},
+{t:"(CTB) O DNIT tem competências de fiscalização de trânsito em rodovias federais, nos termos da lei.",o:["Certo","Errado"],c:0,e:"O DNIT tem atribuições em rodovias federais (compartilhadas conforme a legislação)."},
+{t:"(CTB) Estacionar em vaga de pessoa com deficiência sem credencial é infração grave.",o:["Certo","Errado"],c:1,e:"É infração GRAVÍSSIMA."},
+{t:"(CTB) O condutor é obrigado a parar o veículo diante de sinal vermelho.",o:["Certo","Errado"],c:0,e:"Regra básica de circulação e sinalização."},
+{t:"(CTB) A JARI é o órgão que julga os recursos de infrações em primeira instância administrativa.",o:["Certo","Errado"],c:0,e:"Junta Administrativa de Recursos de Infrações."},
+{t:"(CTB) Transitar com o veículo sem placa é infração leve.",o:["Certo","Errado"],c:1,e:"É infração gravíssima, com remoção do veículo."},
+{t:"(CTB) A embriaguez ao volante pode gerar, ao mesmo tempo, penalidade administrativa e responsabilização penal.",o:["Certo","Errado"],c:0,e:"Independência entre as esferas administrativa e penal."},
+{b:"Bloco III — Direitos (15–22)"},
+{t:"(Constitucional) A casa é asilo inviolável; ninguém nela pode penetrar sem consentimento, salvo em flagrante delito, desastre ou para prestar socorro, ou, durante o dia, por ordem judicial.",o:["Certo","Errado"],c:0,e:"Art. 5º, XI, da CF."},
+{t:"(Constitucional) É livre a manifestação do pensamento, sendo permitido o anonimato.",o:["Certo","Errado"],c:1,e:"É livre a manifestação, mas o anonimato é vedado (art. 5º, IV)."},
+{t:"(Administrativo) A autotutela permite à administração anular seus próprios atos ilegais.",o:["Certo","Errado"],c:0,e:"Súmula 473 do STF / princípio da autotutela."},
+{t:"(Penal) O erro de tipo pode excluir o dolo.",o:["Certo","Errado"],c:0,e:"O erro sobre elemento do tipo exclui o dolo (art. 20 do CP)."},
+{t:"(Proc. Penal) O inquérito policial é presidido pelo delegado de polícia.",o:["Certo","Errado"],c:0,e:"O IP é conduzido pela autoridade policial."},
+{t:"(Leg. Especial) A Lei de Abuso de Autoridade (13.869/2019) pune condutas de agentes públicos que excedem suas funções.",o:["Certo","Errado"],c:0,e:"Tipifica abusos praticados por agentes públicos."},
+{t:"(Direitos Humanos) A Declaração Universal dos Direitos Humanos é de 1948.",o:["Certo","Errado"],c:0,e:"Adotada pela ONU em 1948."},
+{t:"(Leg. Especial) Tortura é crime inafiançável e insuscetível de graça ou anistia.",o:["Certo","Errado"],c:0,e:"CF art. 5º, XLIII, e Lei 9.455/1997."}
+];
+  mountList(document.getElementById("quiz-sim3"),SIM3);
+
+  /* ===================== SIMULADO 4 ===================== */
+  var SIM4=[
+{b:"Bloco I (1–6)"},
+{t:"(Português) “Haviam muitos carros na estrada” está correto.",o:["Certo","Errado"],c:1,e:"“Haver” no sentido de existir é impessoal: “Havia muitos carros”."},
+{t:"(Português) O texto dissertativo-argumentativo defende um ponto de vista com argumentos.",o:["Certo","Errado"],c:0,e:"É a tipologia da redação de concurso."},
+{t:"(RLM) A conjunção “p e q” só é verdadeira quando p e q são ambas verdadeiras.",o:["Certo","Errado"],c:0,e:"Tabela-verdade da conjunção."},
+{t:"(Informática) Em nuvem, os dados ficam armazenados apenas no disco local do usuário.",o:["Certo","Errado"],c:1,e:"Computação em nuvem armazena em servidores remotos, acessados pela internet."},
+{t:"(Física) Quanto maior a massa do veículo, maior a distância necessária para parar, mantidas as demais condições.",o:["Certo","Errado"],c:0,e:"Maior inércia/energia exige mais distância de frenagem."},
+{t:"(Geopolítica) O Mercosul é um bloco econômico do qual o Brasil faz parte.",o:["Certo","Errado"],c:0,e:"Brasil é membro fundador do Mercosul."},
+{b:"Bloco II — Trânsito (7–14)"},
+{t:"(CTB) Conduzir veículo com CNH vencida há mais de 30 dias é infração gravíssima.",o:["Certo","Errado"],c:0,e:"Art. 162, V, do CTB."},
+{t:"(CTB) A penalidade de multa e a medida administrativa de remoção do veículo podem ser aplicadas juntas.",o:["Certo","Errado"],c:0,e:"Penalidade e medida administrativa são coisas diferentes e podem coexistir."},
+{t:"(CTB) O Contran é presidido por um delegado da Polícia Federal.",o:["Certo","Errado"],c:1,e:"O Contran é órgão máximo normativo/consultivo; não é presidido por delegado da PF."},
+{t:"(CTB) Usar o celular na mão enquanto dirige é infração gravíssima.",o:["Certo","Errado"],c:0,e:"Manusear o telefone ao dirigir é infração gravíssima."},
+{t:"(CTB) A CNH definitiva é concedida diretamente, sem período de permissão, ao candidato aprovado.",o:["Certo","Errado"],c:1,e:"Primeiro há a Permissão por 1 ano; depois a CNH definitiva."},
+{t:"(CTB) Rodovia e estrada são diferenciadas pela pavimentação (rodovia é pavimentada; estrada não).",o:["Certo","Errado"],c:0,e:"No CTB, rodovia = via rural pavimentada; estrada = via rural não pavimentada."},
+{t:"(CTB) A velocidade máxima, quando não sinalizada, é definida pela regra geral do CTB conforme o tipo de via.",o:["Certo","Errado"],c:0,e:"Na ausência de sinalização, valem os limites gerais por tipo de via."},
+{t:"(CTB) Avançar o sinal vermelho é infração média.",o:["Certo","Errado"],c:1,e:"É infração GRAVÍSSIMA."},
+{b:"Bloco III — Direitos (15–22)"},
+{t:"(Constitucional) Todos são iguais perante a lei, sem distinção de qualquer natureza.",o:["Certo","Errado"],c:0,e:"Caput do art. 5º da CF."},
+{t:"(Constitucional) O Brasil é uma república federativa formada pela união de Estados, Municípios e do Distrito Federal.",o:["Certo","Errado"],c:0,e:"Art. 1º da CF."},
+{t:"(Administrativo) A improbidade administrativa pode gerar ressarcimento ao erário e perda da função pública.",o:["Certo","Errado"],c:0,e:"Sanções previstas na Lei 8.429/1992."},
+{t:"(Penal) A pena de morte é regra geral no Brasil.",o:["Certo","Errado"],c:1,e:"É vedada, salvo em caso de guerra declarada (art. 5º, XLVII)."},
+{t:"(Proc. Penal) O flagrante é uma das hipóteses de prisão sem ordem judicial prévia.",o:["Certo","Errado"],c:0,e:"Prisão em flagrante independe de mandado."},
+{t:"(Leg. Especial) Segundo a Lei de Drogas, plantar para consumo pessoal recebe o mesmo tratamento do tráfico.",o:["Certo","Errado"],c:1,e:"Cultivo para consumo pessoal segue o art. 28 (usuário), não o tráfico."},
+{t:"(Direitos Humanos) O ECA (Estatuto da Criança e do Adolescente) é um marco de proteção de direitos.",o:["Certo","Errado"],c:0,e:"Lei 8.069/1990."},
+{t:"(Administrativo) O servidor público estável só perde o cargo nas hipóteses previstas na Constituição.",o:["Certo","Errado"],c:0,e:"Estabilidade: perda por processo, avaliação ou sentença, nos termos da CF."}
+];
+  mountList(document.getElementById("quiz-sim4"),SIM4);
+
+  /* ===================== TREINOS (aula + questões) ===================== */
+  var TREINOS=[
+{mat:"Legislação de Trânsito",titulo:"Aula + treino: Sistema Nacional de Trânsito (quem faz o quê)",aula:"O trânsito tem vários órgãos, cada um com um papel. Decore o verbo de cada um: <b>Contran</b> NORMATIZA (cria as regras nacionais); <b>Senatran</b> (antigo Denatran) coordena; <b>Detran</b> executa/fiscaliza no estado e cuida da CNH; <b>DNIT</b> atua nas rodovias federais; a <b>PRF</b> patrulha e fiscaliza as <b>rodovias federais</b>; a <b>JARI</b> julga recursos de multa. Pegadinha da banca: trocar o verbo (quem normatiza × quem fiscaliza × quem julga).",qs:[{t:"O Contran é o órgão responsável por estabelecer as normas regulamentares do trânsito no país.",o:["Certo","Errado"],c:0,e:"Contran = normatiza (regras nacionais)."},{t:"A PRF é responsável por julgar, em primeira instância, os recursos contra multas.",o:["Certo","Errado"],c:1,e:"Quem julga recurso é a JARI. A PRF fiscaliza/patrulha as rodovias federais."},{t:"O Detran é competente para expedir a CNH no âmbito estadual.",o:["Certo","Errado"],c:0,e:"O Detran cuida da habilitação no estado."},{t:"A PRF integra o Sistema Nacional de Trânsito.",o:["Certo","Errado"],c:0,e:"Sim — está entre os órgãos do SNT."}]},
+{mat:"Legislação de Trânsito",titulo:"Aula + treino: CNH, validade e pontuação (Lei 14.071/2020)",aula:"A <b>Lei 14.071/2020</b> mudou pontos importantes. <b>Validade da CNH:</b> 10 anos até 50 anos; 5 anos de 50 a 70; 3 anos com 70+. <b>Pontos por infração:</b> leve 3, média 4, grave 5, gravíssima 7. <b>Suspensão</b> ao atingir, em 12 meses: <b>20 pontos</b> (se houver 2+ gravíssimas), <b>30</b> (1 gravíssima) ou <b>40</b> (nenhuma gravíssima). Permissão do novato: 1 ano.",qs:[{t:"Um condutor de 40 anos tem CNH com validade de 10 anos.",o:["Certo","Errado"],c:0,e:"Até 50 anos: 10 anos."},{t:"A infração grave vale 7 pontos.",o:["Certo","Errado"],c:1,e:"Grave = 5 pontos; gravíssima = 7."},{t:"Sem nenhuma infração gravíssima no período, o limite para suspensão é de 40 pontos em 12 meses.",o:["Certo","Errado"],c:0,e:"Regra da Lei 14.071/2020."},{t:"A Permissão para Dirigir tem validade de 2 anos.",o:["Certo","Errado"],c:1,e:"É de 1 ano; depois vem a CNH definitiva."}]},
+{mat:"Legislação de Trânsito",titulo:"Aula + treino: Infrações, Lei Seca e crimes",aula:"<b>Infração</b> (administrativa) é diferente de <b>crime</b> (penal), e as duas esferas são independentes (podem ocorrer juntas). <b>Lei Seca:</b> dirigir sob influência de álcool é infração <b>gravíssima</b> (art. 165) e pode ser crime (art. 306). <b>Recusar o bafômetro</b> é infração gravíssima (art. 165-A). Homicídio/lesão na direção são <b>crimes de trânsito</b> (arts. 302/303).",qs:[{t:"A embriaguez ao volante pode gerar, ao mesmo tempo, multa administrativa e processo criminal.",o:["Certo","Errado"],c:0,e:"As esferas administrativa e penal são independentes."},{t:"Recusar-se a fazer o teste do bafômetro não gera penalidade.",o:["Certo","Errado"],c:1,e:"É infração gravíssima (art. 165-A), com multa multiplicada e suspensão."},{t:"Homicídio culposo na direção de veículo é apenas infração administrativa.",o:["Certo","Errado"],c:1,e:"É crime de trânsito (art. 302)."},{t:"Ultrapassar pela contramão em local proibido é infração, mesmo sem outro veículo por perto.",o:["Certo","Errado"],c:0,e:"A infração independe de haver outro veículo."}]},
+{mat:"Português",titulo:"Aula + treino: interpretação e reescrita (o jeito Cebraspe)",aula:"A Cebraspe adora <b>reescrever</b> uma frase e perguntar se o <b>sentido foi mantido</b>. O truque é olhar o <b>conectivo</b>: se ele muda a relação (causa, concessão, condição, conclusão), o sentido muda. Ex.: “<i>Embora</i> chovesse, viajou” (concessão) ≠ “<i>Porque</i> chovia, viajou” (causa). Também cuidado com <b>concordância</b> e <b>crase</b>.",qs:[{t:"Trocar “Ele saiu, porque estava tarde” por “Ele saiu, embora estivesse tarde” mantém o sentido.",o:["Certo","Errado"],c:1,e:"“Porque” (causa) vira “embora” (concessão) — muda o sentido."},{t:"Em “Assistimos ao filme”, o uso da preposição “a” está correto (quem assiste, assiste A algo).",o:["Certo","Errado"],c:0,e:"“Assistir” (ver) é transitivo indireto: assistir A algo."},{t:"A frase “Fazem dois anos que ele partiu” está correta.",o:["Certo","Errado"],c:1,e:"“Fazer” indicando tempo é impessoal: “Faz dois anos”."},{t:"Na interpretação, uma alternativa pode estar correta no mundo real, mas errada se não estiver apoiada no texto.",o:["Certo","Errado"],c:0,e:"Interpretação se prende ao texto, não ao conhecimento externo."}]},
+{mat:"Raciocínio Lógico",titulo:"Aula + treino: proposições, negações e argumentos",aula:"Conectivos e quando cada um é VERDADEIRO: <b>E</b> (∧) só se ambos V · <b>OU inclusivo</b> (∨) falso só se ambos F · <b>OU...OU exclusivo</b> (só é V quando os valores são <b>diferentes</b>) · <b>Se...então</b> (→) falso só quando o 1º é V e o 2º é F · <b>Se e somente se</b> (↔) V quando os dois têm o mesmo valor. <b>Negações:</b> ~(p∧q)=~p∨~q; ~(p∨q)=~p∧~q; <b>~(p→q)= p ∧ ~q</b>. Equivalente de “p→q” = contrapositiva “~q→~p” (não a recíproca). Quantificadores: negar “todo” vira “existe um que não”; negar “algum” vira “nenhum”.",qs:[{t:"A negação de “Se estudou, então passou” é “estudou e não passou”.",o:["Certo","Errado"],c:0,e:"Negação do condicional = primeiro verdadeiro e segundo falso."},{t:"“Se p então q” é equivalente a “se q então p”.",o:["Certo","Errado"],c:1,e:"O equivalente é a contrapositiva (se não q então não p), não a recíproca."},{t:"A negação de “Algum policial é alto” é “nenhum policial é alto”.",o:["Certo","Errado"],c:0,e:"Negar o “algum” (existencial) leva ao “nenhum”."},{t:"A disjunção “p ou q” é falsa apenas quando p e q são ambas falsas.",o:["Certo","Errado"],c:0,e:"Tabela-verdade do “ou” inclusivo."}]},
+{mat:"Raciocínio Lógico",titulo:"Aula + treino: o que é (e o que não é) proposição",aula:"<b>Proposição lógica</b> é toda frase declarativa com <b>um único</b> valor: ou Verdadeira, ou Falsa (princípio da bivalência: sem meio-termo). Precisa ter <b>verbo</b> e <b>sentido completo</b>. <b>NÃO são</b> proposições: perguntas (“Que horas são?”), exclamações (“Que dia lindo!”), ordens/pedidos no imperativo (“Faça silêncio”) e <b>sentenças abertas</b> — as que dependem de algo indefinido (“Ele foi o melhor” / “x + 3 = 10”). <b>Exceção de ouro:</b> se a própria frase fixa o valor da variável (“x+3=10, para x=7”), ela vira fechada e passa a ser proposição.",qs:[{t:"A frase “Faça silêncio, soldado!” é uma proposição lógica.",o:["Certo","Errado"],c:1,e:"É imperativa (ordem) — não tem valor V/F, logo não é proposição."},{t:"“Que horas são?” é uma proposição lógica.",o:["Certo","Errado"],c:1,e:"Frase interrogativa não é proposição."},{t:"A sentença aberta “x + 5 = 12” não é, por si só, uma proposição lógica.",o:["Certo","Errado"],c:0,e:"Falta o valor de x — sem valor lógico definido; é sentença aberta."},{t:"“A Terra é o terceiro planeta do Sistema Solar” é uma proposição lógica.",o:["Certo","Errado"],c:0,e:"É declarativa, com verbo e valor definido (Verdadeira)."},{t:"“Ele foi aprovado no concurso” é uma proposição lógica de valor conhecido.",o:["Certo","Errado"],c:1,e:"“Ele” é indefinido (sentença aberta) — sem valor lógico definido."}]},
+{mat:"Raciocínio Lógico",titulo:"Aula + treino: conectivos, disjunção exclusiva e formas camufladas",aula:"A banca <b>camufla</b> os conectivos. <b>“mas / porém / contudo”</b> valem como <b>E</b> (conjunção). <b>“Quem estuda, passa”</b> e <b>“Todo brasileiro é sul-americano”</b> são <b>condicionais</b> disfarçadas (Se estuda, então passa). <b>Disjunção exclusiva “ou...ou”</b> só é V quando os valores são diferentes (uma coisa OU a outra, não as duas). <b>Tabela-verdade:</b> nº de linhas = <b>2ⁿ</b> (n = proposições simples <b>diferentes</b>); se aparecer p e ~p, NÃO conta como duas. Comutam: E, OU inclusivo e ↔. <b>NÃO comutam:</b> condicional (→) e disjunção exclusiva.",qs:[{t:"Na lógica, a frase “Estudei, mas não passei” equivale a uma conjunção (E).",o:["Certo","Errado"],c:0,e:"“mas” = conjunção adversativa → funciona como E."},{t:"“Quem comete infração gravíssima recebe 7 pontos” pode ser lida como um condicional (Se... então).",o:["Certo","Errado"],c:0,e:"“Quem... recebe” = Se é gravíssima, então 7 pontos."},{t:"A disjunção exclusiva “ou p ou q” é verdadeira quando p e q são ambas verdadeiras.",o:["Certo","Errado"],c:1,e:"A exclusiva só é V quando os valores são DIFERENTES; V e V dá Falso."},{t:"Uma proposição com 3 proposições simples diferentes tem tabela-verdade de 8 linhas.",o:["Certo","Errado"],c:0,e:"2³ = 8 linhas."},{t:"O condicional “se p então q” é comutativo (pode inverter a ordem sem mudar o valor).",o:["Certo","Errado"],c:1,e:"O condicional NÃO comuta; “q→p” é a recíproca, não é equivalente."}]},
+{mat:"Direito",titulo:"Aula + treino: Constitucional — art. 5º e segurança pública",aula:"O <b>art. 5º</b> traz os direitos e garantias fundamentais (igualdade, legalidade, liberdade, casa como asilo inviolável, vedação ao anonimato, etc.). Nenhum direito é <b>absoluto</b>. O <b>art. 144</b> lista os órgãos de <b>segurança pública</b> — e a <b>PRF</b> está lá, para o patrulhamento ostensivo das <b>rodovias federais</b>.",qs:[{t:"A Polícia Rodoviária Federal é órgão de segurança pública previsto no art. 144 da CF.",o:["Certo","Errado"],c:0,e:"O art. 144 inclui a PRF."},{t:"O anonimato é permitido pela Constituição na livre manifestação do pensamento.",o:["Certo","Errado"],c:1,e:"A manifestação é livre, mas o anonimato é vedado (art. 5º, IV)."},{t:"A casa é asilo inviolável, mas o ingresso é permitido em flagrante delito, mesmo à noite.",o:["Certo","Errado"],c:0,e:"Art. 5º, XI: flagrante, desastre ou socorro a qualquer hora; ordem judicial só de dia."},{t:"Os direitos fundamentais são absolutos e ilimitados.",o:["Certo","Errado"],c:1,e:"Não há direito absoluto; todos admitem limites."}]},
+{mat:"Direito",titulo:"Aula + treino: Penal — excludentes e tentativa",aula:"<b>Excludentes de ilicitude</b> (o fato deixa de ser crime): legítima defesa, estado de necessidade, estrito cumprimento do dever legal e exercício regular de direito. <b>Legítima defesa</b> = repelir injusta agressão atual/iminente. <b>Tentativa</b>: iniciada a execução, não se consuma por circunstâncias alheias à vontade — pena reduzida de 1/3 a 2/3.",qs:[{t:"Na tentativa, a pena é reduzida de um a dois terços em relação ao crime consumado.",o:["Certo","Errado"],c:0,e:"Art. 14 do CP."},{t:"Legítima defesa e estado de necessidade são a mesma excludente.",o:["Certo","Errado"],c:1,e:"São excludentes distintas (arts. 25 e 24 do CP)."},{t:"O estrito cumprimento do dever legal é uma excludente de ilicitude.",o:["Certo","Errado"],c:0,e:"Está no art. 23 do CP."},{t:"O policial que repele injusta agressão atual a terceiro pode agir em legítima defesa.",o:["Certo","Errado"],c:0,e:"Legítima defesa cabe também em defesa de outrem."}]},
+{mat:"Informática",titulo:"Aula + treino: segurança da informação",aula:"Pilares: <b>confidencialidade, integridade e disponibilidade</b>. <b>Malwares:</b> vírus (precisa de hospedeiro), worm (se espalha sozinho pela rede), trojan (finge ser útil), ransomware (sequestra/criptografa dados e pede resgate). <b>Phishing</b> = engenharia social por e-mail/mensagem. Defesas: senha forte, 2 fatores, antivírus, e <b>backup</b> (de preferência offline).",qs:[{t:"Ransomware criptografa os dados da vítima e costuma exigir resgate.",o:["Certo","Errado"],c:0,e:"É a definição de ransomware."},{t:"Vírus e worm são exatamente a mesma coisa.",o:["Certo","Errado"],c:1,e:"Vírus precisa de hospedeiro; worm se autopropaga pela rede."},{t:"Backup é uma defesa eficaz contra a perda de dados por ransomware.",o:["Certo","Errado"],c:0,e:"Com backup (offline) dá para restaurar sem pagar resgate."},{t:"A autenticação em dois fatores aumenta a segurança do acesso.",o:["Certo","Errado"],c:0,e:"Exige um segundo fator além da senha."}]},
+{mat:"Física",titulo:"Aula + treino: física aplicada ao trânsito",aula:"Na estrada, a física explica a frenagem e as colisões. <b>Energia cinética</b>: Ec = m·v²/2 — depende do <b>quadrado</b> da velocidade. Por isso, <b>dobrar a velocidade quadruplica</b> a energia e a distância de frenagem. Mais massa = mais inércia = mais difícil parar. O <b>atrito</b> pneu-pista é o que freia.",qs:[{t:"Dobrar a velocidade de um carro quadruplica a distância de frenagem.",o:["Certo","Errado"],c:0,e:"A distância depende de v²."},{t:"A energia cinética depende linearmente da velocidade.",o:["Certo","Errado"],c:1,e:"Depende do quadrado da velocidade (v²)."},{t:"Um veículo mais pesado, nas mesmas condições, precisa de mais distância para parar.",o:["Certo","Errado"],c:0,e:"Maior massa = maior energia/inércia."},{t:"O atrito entre pneu e pista é essencial para a frenagem.",o:["Certo","Errado"],c:0,e:"É a força que desacelera o veículo."}]},
+{mat:"Direitos Humanos",titulo:"Aula + treino: DH e uso da força",aula:"<b>Direitos humanos</b> são universais (valem para todos) e orientam a conduta do policial. O <b>uso da força</b> deve seguir: <b>legalidade, necessidade, proporcionalidade e moderação</b> — a força mínima necessária. A Declaração Universal dos Direitos Humanos é de <b>1948</b>. DH não “protegem bandido”: garantem direitos a todos e limitam abusos do Estado.",qs:[{t:"O uso da força pelo policial deve ser proporcional e limitado ao necessário.",o:["Certo","Errado"],c:0,e:"Princípios de necessidade e proporcionalidade."},{t:"Os direitos humanos valem apenas para pessoas sem antecedentes criminais.",o:["Certo","Errado"],c:1,e:"São universais: valem para todas as pessoas."},{t:"A Declaração Universal dos Direitos Humanos foi proclamada em 1948.",o:["Certo","Errado"],c:0,e:"Pela ONU, em 1948."},{t:"Respeitar os direitos humanos é incompatível com uma atuação policial eficiente.",o:["Certo","Errado"],c:1,e:"Não são incompatíveis; DH orientam uma atuação legítima e eficaz."}]}
+];
+
+  var tv=document.getElementById("treinos"), lastMat="";
+  TREINOS.forEach(function(tr,ti){
+    if(tr.mat!==lastMat){lastMat=tr.mat; var dv=document.createElement("h3"); dv.className="matdiv"; dv.setAttribute("data-mat",tr.mat); dv.textContent=tr.mat; tv.appendChild(dv);}
+    var card=document.createElement("div"); card.className="card"; card.style.marginTop="16px"; card.setAttribute("data-mat",tr.mat);
+    card.innerHTML='<p class="eyebrow">'+tr.mat+'</p><h3 style="margin-top:0">'+tr.titulo+'</h3><div class="aula">'+tr.aula+'</div><div class="tq" id="treino-'+ti+'"></div>';
+    tv.appendChild(card);
+    mountQs(document.getElementById("treino-"+ti),tr.qs);
+  });
+
+  /* filtro por matéria */
+  var mats=["Todos"]; TREINOS.forEach(function(t){if(mats.indexOf(t.mat)<0)mats.push(t.mat);});
+  var mf=document.getElementById("matfilter");
+  mf.innerHTML=mats.map(function(m,i){return '<button class="'+(i===0?"on":"")+'" data-m="'+m+'">'+m+'</button>';}).join("");
+  mf.addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b)return;
+    [].forEach.call(mf.children,function(x){x.classList.remove("on");}); b.classList.add("on");
+    var m=b.getAttribute("data-m");
+    [].forEach.call(tv.children,function(c){c.style.display=(m==="Todos"||c.getAttribute("data-mat")===m)?"":"none";});
+  });
+
+  /* Banco de questões + Simulado aleatório */
+  var BANK=[];
+  [SIM2,SIM3,SIM4].forEach(function(S){S.forEach(function(q){if(q.t)BANK.push({t:q.t,o:q.o,c:q.c,e:q.e});});});
+  TREINOS.forEach(function(tr){tr.qs.forEach(function(q){BANK.push({t:q.t,o:q.o,c:q.c,e:q.e});});});
+  if(window.__SIM1)window.__SIM1.forEach(function(q){BANK.push(q);});
+  var agBtn=document.getElementById("aleatorio-gerar");
+  if(agBtn)agBtn.onclick=function(){
+    var pool=BANK.slice();
+    for(var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=pool[i];pool[i]=pool[j];pool[j]=t;}
+    mountList(document.getElementById("quiz-aleatorio"),pool.slice(0,Math.min(40,pool.length)));
+    agBtn.textContent="Gerar outras 40 questões";
+    var s=document.getElementById("aleatorio"); if(s)s.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+
+  /* Banco só de Conhecimentos Específicos */
+  var BANK_ESPEC=[];
+  TREINOS.forEach(function(tr){if(tr.mat==="Legislação de Trânsito")tr.qs.forEach(function(q){BANK_ESPEC.push({t:q.t,o:q.o,c:q.c,e:q.e});});});
+  var egBtn=document.getElementById("espec-gerar");
+  if(egBtn)egBtn.onclick=function(){
+    var pool=BANK_ESPEC.slice();
+    for(var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=pool[i];pool[i]=pool[j];pool[j]=t;}
+    mountQs(document.getElementById("espec-list"),pool.slice(0,Math.min(10,pool.length)));
+    egBtn.textContent="Gerar outras 10 de CTB";
+    var s=document.getElementById("especifico"); if(s)s.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+})();
+</script>
+<script>
+/* ===== Sincronização do progresso com a nuvem (Supabase) ===== */
+window.DMAE_syncPull=async function(){
+  if(!window.sb)return;
+  var uid="";try{uid=localStorage.getItem("dmae:uid")||"";}catch(e){}
+  if(!uid)return;
+  try{
+    var r=await window.sb.from("progress").select("data").eq("user_id",uid).eq("slug",window.DMAE_SLUG||"dmae").maybeSingle();
+    if(r.error)return;
+    if(r.data&&r.data.data){
+      var d=r.data.data;
+      try{
+        if(d.scores)localStorage.setItem(window.DMAE_KEY("scores"),JSON.stringify(d.scores));
+        if(d.caderno)localStorage.setItem(window.DMAE_KEY("cadernoerros"),JSON.stringify(d.caderno));
+        if(d.plano)localStorage.setItem(window.DMAE_KEY("plano"),JSON.stringify(d.plano));
+      }catch(e){}
+      if(window.renderDesempenho)window.renderDesempenho();
+      if(window.renderCaderno)window.renderCaderno();
+      if(window.renderProxima)window.renderProxima();
+      if(window.DMAE_planoApply)window.DMAE_planoApply();
+    } else {
+      /* sem linha na nuvem: sobe o que já existir localmente (migração) */
+      if(window.DMAE_syncPush)window.DMAE_syncPush(true);
+    }
+  }catch(e){}
+};
+(function(){
+  var t=null;
+  window.DMAE_syncPush=function(now){
+    if(!window.sb)return;
+    clearTimeout(t);
+    t=setTimeout(function(){
+      var uid="";try{uid=localStorage.getItem("dmae:uid")||"";}catch(e){}
+      if(!uid)return;
+      var scores=[],caderno=[],plano={};
+      try{scores=JSON.parse(localStorage.getItem(window.DMAE_KEY("scores"))||"[]");}catch(e){}
+      try{caderno=JSON.parse(localStorage.getItem(window.DMAE_KEY("cadernoerros"))||"[]");}catch(e){}
+      try{plano=JSON.parse(localStorage.getItem(window.DMAE_KEY("plano"))||"{}");}catch(e){}
+      window.sb.from("progress").upsert({user_id:uid,slug:(window.DMAE_SLUG||"dmae"),data:{scores:scores,caderno:caderno,plano:plano},updated_at:new Date().toISOString()},{onConflict:"user_id,slug"}).then(function(){},function(){});
+    }, now?0:900);
+  };
+})();
+</script>
+</body>
+</html>
