@@ -53,7 +53,7 @@
   *{box-sizing:border-box}
   html{scroll-behavior:smooth;scroll-padding-top:70px;overflow-x:clip}
   body{overflow-x:clip}
-  img,table,pre,.tw{max-width:100%}
+  img,table,pre,.tw{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
   /* impede que textos longos (URLs, código) estourem a largura no celular */
   p,li,td,th,dd,dt,h1,h2,h3,h4,span,a,b,strong,em,label{overflow-wrap:break-word}
   code{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
@@ -328,6 +328,7 @@
   .mapa-ramos{grid-template-columns:1fr}
   .weights .wrow{font-size:13px}
   table th,table td{padding:8px 10px}
+  .tw table{min-width:480px}
   h1{font-size:26px;line-height:1.2}
   .sec{font-size:20px}
   .back{width:46px;height:46px}
@@ -357,12 +358,12 @@
       <button type="button" class="pwtoggle" id="au-eye" aria-label="Mostrar senha">Mostrar</button>
     </div>
     <button class="btn" id="au-btn" type="button">Entrar / Criar minha conta</button>
-    <p class="authnote">Sua conta funciona em <strong>qualquer aparelho</strong> (celular e computador): o progresso fica salvo <strong>na nuvem</strong> e é privado — ninguém vê o que você errou ou acertou. Use uma senha só para este site (não repita a do banco/e-mail).</p>
+    <p class="authnote"><strong>Uma conta só serve para TODOS os cursinhos.</strong> Entre uma vez e troque de curso pelo botão <em>“Trocar de cursinho”</em> — sem precisar sair. O progresso de cada curso é salvo <strong>na nuvem</strong>, separado e privado, e funciona em <strong>qualquer aparelho</strong> (celular e computador). Use uma senha só para este site.</p>
   </div>
 </div>
 <script>
 /* ===== Autenticação Supabase (contas reais, sincroniza entre aparelhos) ===== */
-window.DMAE_KEY=function(k){var u="";try{u=localStorage.getItem("dmae:uid")||"";}catch(e){}return "dmae:u:"+u+":"+k;};
+window.DMAE_KEY=function(k){var u="";try{u=localStorage.getItem("dmae:uid")||"";}catch(e){}return "dmae:u:"+u+":"+(window.DMAE_SLUG||"dmae")+":"+k;};
 window.DMAE_logout=function(){var done=function(){try{localStorage.removeItem("dmae:uid");}catch(e){}location.reload();};if(window.sb){window.sb.auth.signOut().then(done,done);}else{done();}};
 (function(){
   var wall=document.getElementById("authwall");
@@ -416,7 +417,7 @@ window.DMAE_logout=function(){var done=function(){try{localStorage.removeItem("d
     <span class="brand"><span class="drop" aria-hidden="true"></span> Aprovação <b>PRF</b></span>
     <span class="sp"></span>
     <span class="cd" id="cd">Próximo concurso · <b id="cddays">—</b></span>
-    <span class="userbox" id="userbox" hidden><span id="whoami"></span><button class="tbtn" id="logout" type="button">Sair</button></span>
+    <span class="userbox" id="userbox" hidden><span id="whoami"></span><a class="tbtn" id="troca" href="https://gustav8854-ai.github.io/concursos/" style="text-decoration:none;margin-right:6px">↩ Trocar de cursinho</a><button class="tbtn" id="logout" type="button">Sair</button></span>
     <button class="tbtn" id="theme" aria-label="Alternar tema">◐</button>
   </div>
 </header>
