@@ -1116,15 +1116,30 @@ window.DMAE_logout=function(){var done=function(){try{localStorage.removeItem("d
     <!-- ============ 11. CLAUDE ============ -->
     <section id="claude"><div class="card">
       <p class="eyebrow">Seção 11</p>
-      <h2 class="sec">Seu tutor infinito no Claude Code</h2>
-      <p>Este site é o material fixo. Para <strong>itens Certo/Errado ilimitados e correção personalizada</strong>, use o Claude Code como cursinho particular:</p>
-      <ol>
-        <li>Crie uma pasta <code>prf-2026</code> e coloque nela: <code>CLAUDE.md</code>, <code>base_conhecimento_prf.md</code> e uma subpasta <code>leis/</code> com os PDFs (CTB, Lei 14.071/2020, CF, CP, legislação especial).</li>
-        <li>Abra o terminal na pasta e rode <code>claude</code> — o <code>CLAUDE.md</code> ativa o modo tutor.</li>
-        <li>Peça em português: <em>"monte a sessão de hoje"</em>, <em>"15 itens Certo/Errado de CNH e pontuação, depois o gabarito comentado"</em>, <em>"corrija: 1-Certo, 2-Errado…"</em>, <em>"sorteie 20 flashcards de CTB"</em>, <em>"revisão final por prioridade"</em>.</li>
-        <li>O tutor mantém <code>progresso.md</code> e <code>erros.md</code> — peça a atualização ao fim de cada sessão.</li>
-      </ol>
-      <div class="alert blue"><span class="tag">Dica</span> — coloque a lei seca em <code>leis/</code> para o tutor citar artigo e prazo sem inventar. Peça sempre no formato Cebraspe (Certo/Errado) para treinar como a prova cobra.</div>
+      <h2 class="sec">Seu tutor de IA — tire dúvidas e treine sem limite</h2>
+      <p>O site é o material fixo (aulas, simulados, flashcards). Para <strong>questões ilimitadas e explicações personalizadas</strong>, use uma <strong>inteligência artificial</strong> como professor particular. Tem dois jeitos:</p>
+
+      <div class="callout" style="margin-top:8px">
+        <h3 style="margin-top:0">✅ Jeito fácil (recomendado) — cole num chat de IA gratuito</h3>
+        <p>Abra <strong>Claude.ai</strong>, <strong>ChatGPT</strong> ou <strong>Gemini</strong> (dá para usar de graça no navegador do celular), <strong>copie o texto abaixo</strong>, cole e envie. A IA vira seu tutor deste concurso na hora.</p>
+        <pre id="tutor-prompt" style="white-space:pre-wrap;word-break:break-word;background:var(--line-2);padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5;max-height:300px;overflow:auto;margin:10px 0">Você é meu PROFESSOR PARTICULAR e cursinho para o concurso PRF (Polícia Rodoviária Federal) (cargo Policial Rodoviário Federal), banca Cebraspe, prova de Certo/Errado (cada erro anula um acerto — só marque com certeza). Eu começo quase do zero — ensine com paciência e da forma mais simples possível.
+
+Regras que você deve seguir sempre:
+1) Em cada tema, siga a ordem: APRENDA (explique do zero, com um exemplo do dia a dia) → ENTENDA (a regra enxuta) → NA PROVA (como o assunto cai e qual é a pegadinha da banca).
+2) Prioridade das matérias, nesta ordem: Legislação de Trânsito (CTB), Português, Direito Constitucional/Administrativo/Penal e Raciocínio Lógico.
+3) Gere questões no formato da prova (Certo/Errado (cada erro anula um acerto — só marque com certeza)). Só mostre o gabarito depois que eu responder e explique CADA erro: o que marquei, por que está errado, a regra certa e como não cair de novo. Comente também por que as outras alternativas erram.
+4) Use revisão espaçada: ao fim da sessão, gere 5 flashcards do que eu errei e me lembre de revisar em 24 horas, 7 dias e 21 dias.
+5) Nunca invente lei, artigo, prazo ou dado; se não tiver certeza, diga que precisa conferir na fonte oficial.
+
+Comece me perguntando quanto tempo eu tenho hoje e qual matéria quero estudar; então monte a sessão de hoje.</pre>
+        <button class="btn" type="button" onclick="try{var t=document.getElementById('tutor-prompt').innerText;if(navigator.clipboard){navigator.clipboard.writeText(t);}else{var r=document.createRange();r.selectNode(document.getElementById('tutor-prompt'));window.getSelection().removeAllRanges();window.getSelection().addRange(r);document.execCommand('copy');}this.textContent='✓ Copiado! Agora cole no chat da IA';}catch(e){this.textContent='Selecione o texto acima e copie';}">Copiar o prompt do tutor</button>
+        <p class="peg" style="margin:10px 0 0">Dica: depois de colar, é só conversar em português — “me explique de novo mais simples”, “me dê 10 questões disso”, “corrija: 1-C, 2-E…”, “o que revisar hoje?”. As versões gratuitas já resolvem bem; nas pagas o tutor fica ainda melhor.</p>
+      </div>
+
+      <div class="alert blue" style="margin-top:16px">
+        <span class="tag">⚙️ Jeito avançado (opcional) — Claude Code no computador</span>
+        Se você usa o <strong>Claude Code</strong> (no terminal), crie uma pasta <code>prf-2026</code> com <code>CLAUDE.md</code>, <code>base_conhecimento_prf.md</code> e uma subpasta <code>leis/</code> (a lei seca em PDF). Rode <code>claude</code> na pasta e peça: <em>“monte a sessão de hoje”</em>, <em>“simulado de 10 questões de X”</em>, <em>“corrija”</em>, <em>“sorteie 20 flashcards”</em>. Ele mantém <code>progresso.md</code> e <code>erros.md</code>. É mais poderoso, mas exige instalar o programa — por isso o jeito fácil acima serve para todo mundo.
+      </div>
     </div></section>
 
     <footer>
@@ -1253,21 +1268,26 @@ window.renderErrPanel=function(host,anchorEl,errors,total){
     d.className+=" zero";
     d.innerHTML='<h4>Você não errou nenhuma! 🎉</h4><p>Acertou todas as '+total+'. Refaça daqui a alguns dias sem olhar — se continuar acertando, está fixado.</p>';
   } else {
+    function _txt(o){var s=o.querySelectorAll("span"); return s.length?s[s.length-1].innerHTML:o.textContent;}
     var lis=errors.map(function(e){
-      var optsHTML="";
+      var optsHTML="", youTxt=(e.you||'em branco'), corrTxt=e.correct;
       var qd=document.getElementById(e.anchor);
       if(qd){
         var opts=qd.querySelectorAll(".opt");
         if(opts.length){
           optsHTML='<div class="eopts">'+[].map.call(opts,function(o){
-            var sp=o.querySelectorAll("span"); var txt=sp.length?sp[sp.length-1].innerHTML:o.textContent;
             var right=o.classList.contains("right"), wrong=o.classList.contains("wrong");
             var mk=right?'✓ ':(wrong?'✗ ':'');
-            return '<div class="eopt'+(right?' r':'')+(wrong?' w':'')+'">'+mk+txt+'</div>';
+            return '<div class="eopt'+(right?' r':'')+(wrong?' w':'')+'">'+mk+_txt(o)+'</div>';
           }).join("")+'</div>';
+          if(opts.length<=2){ /* Certo/Errado: usar o texto, não a letra */
+            var r=qd.querySelector(".opt.right"), w=qd.querySelector(".opt.wrong");
+            if(r)corrTxt=_txt(r);
+            youTxt = w?_txt(w):'em branco';
+          }
         }
       }
-      return '<li><a href="#'+e.anchor+'">Questão '+e.n+'</a> — você marcou <b class="you">'+(e.you||'em branco')+'</b>; a certa é <b class="ok">'+e.correct+'</b>.'
+      return '<li><a href="#'+e.anchor+'">Questão '+e.n+'</a> — você marcou <b class="you">'+youTxt+'</b>; a certa é <b class="ok">'+corrTxt+'</b>.'
         +'<div class="eq">"'+e.qt+'"</div>'+optsHTML
         +'<div class="ei"><b>Entenda o porquê:</b> '+e.expl+'</div></li>';
     }).join("");
@@ -1369,7 +1389,7 @@ window.renderDesempenho=function(){
     if(q.b){html+='<div class="blocklabel">'+q.b+'</div>';}
     if(q.passage){html+='<div class="passage">'+q.passage+'</div>';}
     if(q.n){
-      html+='<div class="q" data-i="'+i+'" id="simq'+q.n+'"><div class="qn">Questão '+q.n+'</div><div class="qt">'+q.t+'</div>';
+      html+='<div class="q" data-c="'+q.c+'" data-i="'+i+'" id="simq'+q.n+'"><div class="qn">Questão '+q.n+'</div><div class="qt">'+q.t+'</div>';
       var ce=q.o.length<=2;
       q.o.forEach(function(txt,j){
         html+='<label class="opt"><input type="radio" name="q'+q.n+'" value="'+j+'">'+(ce?'':'<span class="lt">'+"ABCD"[j]+')</span>')+'<span>'+txt+'</span></label>';
@@ -1385,14 +1405,14 @@ window.renderDesempenho=function(){
   document.getElementById("corrigir").onclick=function(){
     var acertos=0, errs=[], cadErrs=[], pts=0, maxpts=0, byMat={}, curMat="";
     SIM.forEach(function(q){
-      if(q.b){curMat=q.b.replace(/\s*\(.*\)\s*/,"");return;}
+      if(q.b){curMat=q.b.replace(/\s*\(.*\)\s*/,"").replace(/\s+[—-]\s.*$/,"").trim();return;}
       if(!q.n)return;
       var qd=document.getElementById('simq'+q.n);
       if(!qd)return;
       var opts=qd.querySelectorAll('.opt');
       var sel=qd.querySelector('input:checked');
       opts.forEach(function(o){o.classList.remove('right','wrong');});
-      opts[q.c].classList.add('right');
+      if(opts[q.c])opts[q.c].classList.add('right');
       var acertou=false;
       if(sel){var v=+sel.value; if(v===q.c){acertos++;acertou=true;} else {opts[v].classList.add('wrong');}}
       qd.querySelector('.expl').classList.add('show');
@@ -1518,7 +1538,7 @@ var FC=[
     qs.forEach(function(qd,i){qd.id=host.id+"_q"+(i+1);[].forEach.call(qd.querySelectorAll("input"),function(inp){inp.name=host.id+"_"+i;});});
     var mats=[],curMat="";
     [].forEach.call(host.children,function(ch){
-      if(ch.classList&&ch.classList.contains("blocklabel"))curMat=ch.textContent.replace(/\s*\(.*\)\s*/,"");
+      if(ch.classList&&ch.classList.contains("blocklabel"))curMat=ch.textContent.replace(/\s*\(.*\)\s*/,"").replace(/\s+[—-]\s.*$/,"").trim();
       else if(ch.classList&&ch.classList.contains("q"))mats.push(curMat);
     });
     var structured=false;
@@ -1549,7 +1569,7 @@ var FC=[
         }
       });
       var pct=Math.round(ac/qs.length*100);
-      var liq=ac-(qs.length-ac);
+      var liq=ac-errs.filter(function(x){return x.you;}).length;
       var msg=pct>=70?"Ótimo!":pct>=50?"Bom — revise os erros abaixo.":"Releia a aula e veja os erros abaixo.";
       b.querySelector(".sc").innerHTML="Acertos: <b>"+ac+"</b>/"+qs.length+" ("+pct+"%) · líquido (padrão Cebraspe) <b>"+liq+"</b>. "+msg;
       window.renderErrPanel(host,b,errs,qs.length);
@@ -1582,7 +1602,7 @@ var FC=[
     try{arr=JSON.parse(localStorage.getItem(K)||"[]");}catch(e){}
     var seen={};arr.forEach(function(x){seen[x.id]=1;});
     list.forEach(function(it){
-      var id=it.label+"§"+it.t;
+      var id=it.t;
       if(!seen[id]){arr.push({id:id,label:it.label,t:it.t,o:it.o,c:it.c,e:it.e});seen[id]=1;}
     });
     if(arr.length>200)arr=arr.slice(-200);
@@ -1627,14 +1647,14 @@ var FC=[
       if(!arr.length){alert("Seu caderno está vazio — faça um simulado ou treino primeiro.");return;}
       var LL="ABCD".split("");
       var body=arr.map(function(q,i){
-        var opts=q.o.map(function(o,j){return '<div>'+LL[j]+') '+o+'</div>';}).join("");
-        return '<div class="q"><p><b>'+(i+1)+'. ['+q.label+']</b> '+q.t+'</p><div class="o">'+opts+'</div><div class="a"><b>Gabarito: '+LL[q.c]+'.</b> '+q.e+'</div></div>';
+        var opts=q.o.map(function(o,j){return '<div>'+(q.o.length<=2?'':LL[j]+') ')+o+'</div>';}).join("");
+        return '<div class="q"><p><b>'+(i+1)+'. ['+q.label+']</b> '+q.t+'</p><div class="o">'+opts+'</div><div class="a"><b>Gabarito: '+(q.o.length<=2?q.o[q.c]:LL[q.c]+'.')+'</b> '+q.e+'</div></div>';
       }).join("");
       var html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Caderno de erros - PRF 2026</title>'
         +'<style>body{font-family:Arial,Helvetica,sans-serif;max-width:820px;margin:24px auto;padding:0 18px;color:#111;line-height:1.5}'
         +'h1{font-size:20px} .q{border-bottom:1px solid #ccc;padding:12px 0} .o div{margin:2px 0} '
         +'.a{background:#eef2f4;padding:8px 10px;border-radius:6px;margin-top:6px;font-size:14px}</style></head>'
-        +'<body><h1>Meu caderno de erros — DMAE 2026 ('+arr.length+' questões)</h1>'
+        +'<body><h1>Meu caderno de erros — PRF 2026 ('+arr.length+' questões)</h1>'
         +'<p>Refaça cada uma tapando o gabarito; leia a explicação só depois de responder.</p>'+body+'</body></html>';
       try{
         var blob=new Blob([html],{type:"text/html;charset=utf-8"});
@@ -1804,6 +1824,7 @@ var FC=[
 </script>
 <script>
 /* ===== Sincronização do progresso com a nuvem (Supabase) ===== */
+window.__syncReady=false; setTimeout(function(){window.__syncReady=true;},6000);
 window.DMAE_syncPull=async function(){
   if(!window.sb)return;
   var uid="";try{uid=localStorage.getItem("dmae:uid")||"";}catch(e){}
@@ -1826,8 +1847,10 @@ window.DMAE_syncPull=async function(){
       if(window.DMAE_planoApply)window.DMAE_planoApply();
       if(window.DMAE_fcApply)window.DMAE_fcApply();
       if(window.DMAE_dailyApply)window.DMAE_dailyApply();
+      window.__syncReady=true;
     } else {
       /* sem linha na nuvem: sobe o que já existir localmente (migração) */
+      window.__syncReady=true;
       if(window.DMAE_syncPush)window.DMAE_syncPush(true);
     }
   }catch(e){}
@@ -1836,6 +1859,7 @@ window.DMAE_syncPull=async function(){
   var t=null;
   window.DMAE_syncPush=function(now){
     if(!window.sb)return;
+    if(!window.__syncReady&&!now)return;
     clearTimeout(t);
     t=setTimeout(function(){
       var uid="";try{uid=localStorage.getItem("dmae:uid")||"";}catch(e){}
@@ -1863,7 +1887,7 @@ window.DMAE_syncPull=async function(){
   function dread(){try{return JSON.parse(localStorage.getItem(DK())||"{}");}catch(e){return {};}}
   function tkey(dt){return dt.getFullYear()+"-"+("0"+(dt.getMonth()+1)).slice(-2)+"-"+("0"+dt.getDate()).slice(-2);}
   function today(){return tkey(new Date());}
-  function streakOf(o){var s=0,d=new Date();for(;;){var k=tkey(d);if(o[k]&&o[k]>0){s++;d.setDate(d.getDate()-1);}else break;}return s;}
+  function streakOf(o){var s=0,d=new Date();if(!(o[tkey(d)]>0))d.setDate(d.getDate()-1);for(;;){var k=tkey(d);if(o[k]&&o[k]>0){s++;d.setDate(d.getDate()-1);}else break;}return s;}
   var GOAL=20;
   window.DMAE_addAnswers=function(n){ if(!n)return; var o=dread(),t=today(); o[t]=(o[t]||0)+n; try{localStorage.setItem(DK(),JSON.stringify(o));}catch(e){} if(window.DMAE_syncPush)window.DMAE_syncPush(); dpanel(); };
   function dpanel(){
@@ -1879,8 +1903,8 @@ window.DMAE_syncPull=async function(){
   function markAnswered(q){ if(!q||q.dataset.cnt)return; q.dataset.cnt="1"; window.DMAE_addAnswers(1); }
 
   /* ---- modo estudo (feedback imediato) ---- */
-  var SK=(window.DMAE_SLUG||"x")+":studymode";
-  function studyOn(){try{return localStorage.getItem(SK)==="1";}catch(e){return false;}}
+  function SK(){return window.DMAE_KEY("studymode");}
+  function studyOn(){try{return localStorage.getItem(SK())==="1";}catch(e){return false;}}
   var prox2=document.getElementById("proxima");
   if(prox2&&prox2.parentNode){
     var bar=document.createElement("label"); bar.className="studybar";
@@ -1889,7 +1913,7 @@ window.DMAE_syncPull=async function(){
     bar.appendChild(cb); bar.appendChild(sp);
     var hp=document.getElementById("hoje-painel");
     prox2.parentNode.insertBefore(bar,(hp?hp.nextSibling:prox2.nextSibling));
-    cb.onchange=function(){try{localStorage.setItem(SK,cb.checked?"1":"0");}catch(e){}};
+    cb.onchange=function(){try{localStorage.setItem(SK(),cb.checked?"1":"0");}catch(e){}};
   }
   document.addEventListener("change",function(e){
     var inp=e.target; if(!inp||inp.type!=="radio")return;
