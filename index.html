@@ -1254,8 +1254,21 @@ window.renderErrPanel=function(host,anchorEl,errors,total){
     d.innerHTML='<h4>Você não errou nenhuma! 🎉</h4><p>Acertou todas as '+total+'. Refaça daqui a alguns dias sem olhar — se continuar acertando, está fixado.</p>';
   } else {
     var lis=errors.map(function(e){
+      var optsHTML="";
+      var qd=document.getElementById(e.anchor);
+      if(qd){
+        var opts=qd.querySelectorAll(".opt");
+        if(opts.length){
+          optsHTML='<div class="eopts">'+[].map.call(opts,function(o){
+            var sp=o.querySelectorAll("span"); var txt=sp.length?sp[sp.length-1].innerHTML:o.textContent;
+            var right=o.classList.contains("right"), wrong=o.classList.contains("wrong");
+            var mk=right?'✓ ':(wrong?'✗ ':'');
+            return '<div class="eopt'+(right?' r':'')+(wrong?' w':'')+'">'+mk+txt+'</div>';
+          }).join("")+'</div>';
+        }
+      }
       return '<li><a href="#'+e.anchor+'">Questão '+e.n+'</a> — você marcou <b class="you">'+(e.you||'em branco')+'</b>; a certa é <b class="ok">'+e.correct+'</b>.'
-        +'<div class="eq">"'+e.qt+'"</div>'
+        +'<div class="eq">"'+e.qt+'"</div>'+optsHTML
         +'<div class="ei"><b>Entenda o porquê:</b> '+e.expl+'</div></li>';
     }).join("");
     d.innerHTML='<h4>Revise seus erros — '+errors.length+' de '+total+'</h4>'
@@ -1441,18 +1454,52 @@ var FC=[
 ["Estratégia Cebraspe","Na dúvida real, deixe em branco (não anula). Cuidado com 'sempre/somente'."]
 ];
 (function(){
-  var box=document.getElementById("fcs"),order=FC.map(function(_,i){return i;});
+  var box=document.getElementById("fcs"); if(!box||typeof FC==="undefined")return;
+  function K(){return window.DMAE_KEY("fcsrs");}
+  function readSt(){try{return JSON.parse(localStorage.getItem(K())||"{}");}catch(e){return {};}}
+  function writeSt(s){try{localStorage.setItem(K(),JSON.stringify(s));}catch(e){} if(window.DMAE_syncPush)window.DMAE_syncPush();}
+  var INT=[0,1,3,7,21], DAY=86400000;
+  var order=FC.map(function(_,i){return i;}), mode="todos", allOpen=false;
+  function due(idx,st){var c=st[idx];return !c || (c.due||0)<=Date.now();}
+  function boxOf(idx,st){return (st[idx]&&st[idx].box)||1;}
   function render(){
-    box.innerHTML=order.map(function(idx,pos){
-      return '<div class="fc" data-i="'+idx+'"><div class="fn">Flashcard '+(pos+1)+'</div><div class="fq">'+FC[idx][0]+'</div><div class="fa">'+FC[idx][1]+'</div><div class="hint">toque para ver a resposta</div></div>';
-    }).join("");
-    document.getElementById("fc-count").textContent=FC.length+" cartões";
+    var st=readSt();
+    var arr=order.filter(function(idx){return mode==="hoje"?due(idx,st):true;});
+    if(mode==="hoje"&&!arr.length){
+      box.innerHTML='<div class="errpanel zero"><h4>Tudo revisado por hoje! 🎉</h4><p>Nenhum cartão vencido. Volte amanhã ou toque em “Ver todos” para revisar mesmo assim.</p></div>';
+    } else {
+      box.innerHTML=arr.map(function(idx,pos){
+        var b=boxOf(idx,st);
+        return '<div class="fc" data-i="'+idx+'"><div class="fn">Flashcard '+(pos+1)+' · caixa '+b+'/5</div><div class="fq">'+FC[idx][0]+'</div><div class="fa">'+FC[idx][1]+'<div class="srs"><button type="button" class="btn ghost srs-no">Não sei ↺</button><button type="button" class="btn srs-yes">Sei ✓</button></div></div><div class="hint">toque para ver a resposta</div></div>';
+      }).join("");
+    }
+    var due0=order.filter(function(idx){return due(idx,st);}).length;
+    var cc=document.getElementById("fc-count"); if(cc)cc.textContent=FC.length+' cartões · '+due0+' para revisar hoje';
   }
   render();
-  box.addEventListener("click",function(e){var c=e.target.closest(".fc");if(c)c.classList.toggle("open");});
-  document.getElementById("fc-shuffle").onclick=function(){for(var i=order.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=order[i];order[i]=order[j];order[j]=t;}render();};
-  var allOpen=false;
-  document.getElementById("fc-all").onclick=function(){allOpen=!allOpen;box.querySelectorAll(".fc").forEach(function(c){c.classList.toggle("open",allOpen);});};
+  box.addEventListener("click",function(e){
+    var y=e.target.closest(".srs-yes"), n=e.target.closest(".srs-no");
+    if(y||n){
+      e.stopPropagation();
+      var card=(y||n).closest(".fc"); if(!card)return;
+      var idx=+card.getAttribute("data-i");
+      var st=readSt(); var c=st[idx]||{box:1};
+      if(y){c.box=Math.min(5,(c.box||1)+1);} else {c.box=1;}
+      c.due=Date.now()+INT[c.box-1]*DAY; st[idx]=c; writeSt(st);
+      render(); return;
+    }
+    var fc=e.target.closest(".fc"); if(fc)fc.classList.toggle("open");
+  });
+  var sh=document.getElementById("fc-shuffle");
+  if(sh)sh.onclick=function(){for(var i=order.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=order[i];order[i]=order[j];order[j]=t;}render();};
+  var al=document.getElementById("fc-all");
+  if(al)al.onclick=function(){allOpen=!allOpen;box.querySelectorAll(".fc").forEach(function(c){c.classList.toggle("open",allOpen);});};
+  if(sh&&sh.parentNode){
+    var rb=document.createElement("button"); rb.type="button"; rb.className="btn ghost"; rb.id="fc-today"; rb.textContent="Revisar hoje";
+    sh.parentNode.insertBefore(rb,sh);
+    rb.onclick=function(){mode=(mode==="hoje"?"todos":"hoje"); rb.textContent=(mode==="hoje"?"Ver todos":"Revisar hoje"); render();};
+  }
+  window.DMAE_fcApply=render;
 })();
 </script>
 <script>
@@ -1770,11 +1817,15 @@ window.DMAE_syncPull=async function(){
         if(d.scores)localStorage.setItem(window.DMAE_KEY("scores"),JSON.stringify(d.scores));
         if(d.caderno)localStorage.setItem(window.DMAE_KEY("cadernoerros"),JSON.stringify(d.caderno));
         if(d.plano)localStorage.setItem(window.DMAE_KEY("plano"),JSON.stringify(d.plano));
+        if(d.fcsrs)localStorage.setItem(window.DMAE_KEY("fcsrs"),JSON.stringify(d.fcsrs));
+        if(d.daily)localStorage.setItem(window.DMAE_KEY("daily"),JSON.stringify(d.daily));
       }catch(e){}
       if(window.renderDesempenho)window.renderDesempenho();
       if(window.renderCaderno)window.renderCaderno();
       if(window.renderProxima)window.renderProxima();
       if(window.DMAE_planoApply)window.DMAE_planoApply();
+      if(window.DMAE_fcApply)window.DMAE_fcApply();
+      if(window.DMAE_dailyApply)window.DMAE_dailyApply();
     } else {
       /* sem linha na nuvem: sobe o que já existir localmente (migração) */
       if(window.DMAE_syncPush)window.DMAE_syncPush(true);
@@ -1789,13 +1840,78 @@ window.DMAE_syncPull=async function(){
     t=setTimeout(function(){
       var uid="";try{uid=localStorage.getItem("dmae:uid")||"";}catch(e){}
       if(!uid)return;
-      var scores=[],caderno=[],plano={};
+      var scores=[],caderno=[],plano={},fcsrs={},daily={};
       try{scores=JSON.parse(localStorage.getItem(window.DMAE_KEY("scores"))||"[]");}catch(e){}
       try{caderno=JSON.parse(localStorage.getItem(window.DMAE_KEY("cadernoerros"))||"[]");}catch(e){}
       try{plano=JSON.parse(localStorage.getItem(window.DMAE_KEY("plano"))||"{}");}catch(e){}
-      window.sb.from("progress").upsert({user_id:uid,slug:(window.DMAE_SLUG||"dmae"),data:{scores:scores,caderno:caderno,plano:plano},updated_at:new Date().toISOString()},{onConflict:"user_id,slug"}).then(function(){},function(){});
+      try{fcsrs=JSON.parse(localStorage.getItem(window.DMAE_KEY("fcsrs"))||"{}");}catch(e){}
+      try{daily=JSON.parse(localStorage.getItem(window.DMAE_KEY("daily"))||"{}");}catch(e){}
+      window.sb.from("progress").upsert({user_id:uid,slug:(window.DMAE_SLUG||"dmae"),data:{scores:scores,caderno:caderno,plano:plano,fcsrs:fcsrs,daily:daily},updated_at:new Date().toISOString()},{onConflict:"user_id,slug"}).then(function(){},function(){});
     }, now?0:900);
   };
+})();
+</script>
+<script>
+/* ===== Melhorias de aprendizado: modo estudo + meta diária/ofensiva (aditivo) ===== */
+(function(){
+  var st=document.createElement("style");
+  st.textContent=".srs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.eopts{margin:6px 0 2px}.eopt{padding:2px 0;color:var(--muted)}.eopt.r{color:var(--green);font-weight:600}.eopt.w{color:var(--red)}.studybar{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:14px;flex-wrap:wrap}.studybar input{width:16px;height:16px;accent-color:var(--green)}#hoje-painel{margin:0 0 14px}";
+  document.head.appendChild(st);
+
+  /* ---- meta diária + ofensiva ---- */
+  function DK(){return window.DMAE_KEY("daily");}
+  function dread(){try{return JSON.parse(localStorage.getItem(DK())||"{}");}catch(e){return {};}}
+  function tkey(dt){return dt.getFullYear()+"-"+("0"+(dt.getMonth()+1)).slice(-2)+"-"+("0"+dt.getDate()).slice(-2);}
+  function today(){return tkey(new Date());}
+  function streakOf(o){var s=0,d=new Date();for(;;){var k=tkey(d);if(o[k]&&o[k]>0){s++;d.setDate(d.getDate()-1);}else break;}return s;}
+  var GOAL=20;
+  window.DMAE_addAnswers=function(n){ if(!n)return; var o=dread(),t=today(); o[t]=(o[t]||0)+n; try{localStorage.setItem(DK(),JSON.stringify(o));}catch(e){} if(window.DMAE_syncPush)window.DMAE_syncPush(); dpanel(); };
+  function dpanel(){
+    var host=document.getElementById("hoje-painel"); if(!host)return;
+    var o=dread(),n=o[today()]||0,s=streakOf(o),pct=Math.min(100,Math.round(n/GOAL*100));
+    host.innerHTML='<div class="cprow"><span>🔥 <b>Ofensiva:</b> '+s+' dia'+(s===1?"":"s")+' seguido'+(s===1?"":"s")+'</span><span class="cbar"><i style="width:'+pct+'%"></i></span><span><b>Hoje:</b> '+n+'/'+GOAL+' questões'+(n>=GOAL?' ✅':'')+'</span></div>';
+  }
+  window.DMAE_dailyApply=dpanel;
+  var prox=document.getElementById("proxima");
+  if(prox&&prox.parentNode){var p=document.createElement("div");p.id="hoje-painel";p.className="desempenho";prox.parentNode.insertBefore(p,prox.nextSibling);}
+  dpanel();
+
+  function markAnswered(q){ if(!q||q.dataset.cnt)return; q.dataset.cnt="1"; window.DMAE_addAnswers(1); }
+
+  /* ---- modo estudo (feedback imediato) ---- */
+  var SK=(window.DMAE_SLUG||"x")+":studymode";
+  function studyOn(){try{return localStorage.getItem(SK)==="1";}catch(e){return false;}}
+  var prox2=document.getElementById("proxima");
+  if(prox2&&prox2.parentNode){
+    var bar=document.createElement("label"); bar.className="studybar";
+    var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=studyOn();
+    var sp=document.createElement("span"); sp.innerHTML="<b>Modo estudo</b> — ver o porquê assim que eu respondo (em vez de só no fim). Desligado = modo prova.";
+    bar.appendChild(cb); bar.appendChild(sp);
+    var hp=document.getElementById("hoje-painel");
+    prox2.parentNode.insertBefore(bar,(hp?hp.nextSibling:prox2.nextSibling));
+    cb.onchange=function(){try{localStorage.setItem(SK,cb.checked?"1":"0");}catch(e){}};
+  }
+  document.addEventListener("change",function(e){
+    var inp=e.target; if(!inp||inp.type!=="radio")return;
+    var q=inp.closest(".q"); if(!q)return;
+    if(!studyOn())return;
+    var expl=q.querySelector(".expl"); if(expl)expl.classList.add("show");
+    var dc=q.getAttribute("data-c");
+    if(dc!==null){
+      var opts=q.querySelectorAll(".opt"), ins=q.querySelectorAll("input");
+      [].forEach.call(opts,function(o){o.classList.remove("right","wrong");});
+      if(opts[+dc])opts[+dc].classList.add("right");
+      var v=[].indexOf.call(ins,inp); if(v!==+dc&&opts[v])opts[v].classList.add("wrong");
+    }
+    markAnswered(q);
+  });
+  /* conta ao corrigir (ambos os motores) */
+  document.addEventListener("click",function(e){
+    var b=e.target.closest(".cor"), b2=(e.target.id==="corrigir"?e.target:null);
+    var btn=b||b2; if(!btn)return;
+    var scope=btn.closest(".card")||document;
+    setTimeout(function(){ [].forEach.call(scope.querySelectorAll(".q"),function(q){ if(q.querySelector("input:checked"))markAnswered(q); }); },30);
+  });
 })();
 </script>
 </body>
