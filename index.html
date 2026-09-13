@@ -1029,7 +1029,7 @@ window.DMAE_logout=function(){var done=function(){try{localStorage.removeItem("d
     <section id="flashcards"><div class="card">
       <p class="eyebrow">Seção 9 · flashcards</p>
       <h2 class="sec">Flashcards — revisão diária</h2>
-      <p>Toque no cartão para ver a resposta. Responda em voz alta <em>antes</em> de virar (recuperação ativa).</p>
+      <p>Toque no cartão para ver a resposta (responda em voz alta <em>antes</em> de virar). Depois marque <b>Sei ✓</b> ou <b>Não sei ↺</b>: o cartão sobe ou volta de <b>caixa</b> e reaparece no momento certo (revisão espaçada — 1, 3, 7 e 21 dias). Use <b>Revisar hoje</b> para ver só os que estão vencidos.</p>
       <div class="fctools">
         <button class="btn ghost" id="fc-shuffle">Embaralhar</button>
         <button class="btn ghost" id="fc-all">Mostrar/ocultar todas</button>
@@ -1364,7 +1364,9 @@ window.renderProxima=function(){
   }
   var f=window.DMAE_fraca(scores),foco="";
   if(f)foco='<p class="foco">🎯 Sua matéria mais fraca até agora: <b>'+f.mat+'</b> ('+f.pct+'% de acerto). Dê atenção extra a ela.</p>';
-  host.innerHTML='<h4>Sua próxima ação</h4><p>'+txt+'</p><a class="btn" href="'+href+'">'+bt+'</a>'+foco;
+  var fcDue=0;try{var _fs=JSON.parse(localStorage.getItem(window.DMAE_KEY("fcsrs"))||"{}");var _nw=Date.now();for(var _k in _fs){if(_fs[_k]&&(_fs[_k].due||0)<=_nw)fcDue++;}}catch(e){}
+  var fcNud=fcDue>0?'<p class="foco">🔁 Você tem <b>'+fcDue+'</b> flashcard'+(fcDue>1?"s":"")+' para revisar hoje (revisão espaçada). <a href="#flashcards">Revisar agora →</a></p>':"";
+  host.innerHTML='<h4>Sua próxima ação</h4><p>'+txt+'</p><a class="btn" href="'+href+'">'+bt+'</a>'+foco+fcNud;
   host.hidden=false;
 };
 window.renderDesempenho=function(){
