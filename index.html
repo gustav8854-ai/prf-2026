@@ -2089,5 +2089,51 @@ var MAPAS=[{"tema": "Sistema Nacional de Trânsito", "ramos": [{"t": "Cada órg�
 })();
 </script>
 
+<script>
+/* ===== Botao "Perguntar ao Gemini" em cada questao (copia enunciado+alternativas+comando) ===== */
+(function(){
+  if(window.__askiaInit)return; window.__askiaInit=true;
+  var css=document.createElement("style");
+  css.textContent='.askia{display:inline-flex;align-items:center;gap:6px;margin:10px 8px 2px 0;padding:9px 13px;font:600 13px/1 "Public Sans",system-ui,sans-serif;color:var(--blue);background:transparent;border:1px solid var(--blue);border-radius:999px;cursor:pointer;min-height:40px}.askia:hover{background:color-mix(in srgb,var(--blue) 12%,transparent)}.askia.ok{color:var(--green);border-color:var(--green)}@media(max-width:600px){.askia{width:100%;justify-content:center}}';
+  document.head.appendChild(css);
+  function inject(q){
+    if(!q||!q.querySelector||!q.querySelector(".qt")||q.querySelector(".askia"))return;
+    var b=document.createElement("button"); b.type="button"; b.className="askia";
+    b.textContent="🤖 Perguntar ao Gemini";
+    var expl=q.querySelector(".expl");
+    if(expl)q.insertBefore(b,expl); else q.appendChild(b);
+  }
+  function scan(root){try{[].forEach.call((root||document).querySelectorAll(".q"),inject);}catch(e){}}
+  function buildPrompt(q){
+    var qt=((q.querySelector(".qt")||{}).innerText||"").trim();
+    var opts=[].map.call(q.querySelectorAll(".opt"),function(o){var sp=o.querySelectorAll("span");return (sp.length?sp[sp.length-1].innerText:o.innerText).trim();});
+    var L="ABCDE".split("");
+    var body="Sou candidato de concurso publico e quero ENTENDER esta questao. Explique de forma simples e passo a passo: por que a alternativa correta esta certa e por que cada uma das outras esta errada. Aponte a pegadinha da banca e a regra/teoria que eu preciso saber. Ao final, faca 1 pergunta rapida pra testar se eu entendi.\n\nQUESTAO:\n"+qt;
+    var ce=(opts.length===2 && /^(certo|errado)$/i.test(opts[0]) && /^(certo|errado)$/i.test(opts[1]));
+    if(ce){ body+="\n\n(Item para julgar como CERTO ou ERRADO.)"; }
+    else if(opts.length){ body+="\n\n"+opts.map(function(t,i){return L[i]+") "+t;}).join("\n"); }
+    return body;
+  }
+  function copy(txt,btn){
+    var restore=function(){setTimeout(function(){btn.classList.remove("ok");btn.textContent="🤖 Perguntar ao Gemini";},4500);};
+    var ok=function(){btn.classList.add("ok");btn.textContent="✓ Copiado! Abra o Gemini e cole";restore();};
+    var fail=function(){btn.textContent="Copie o texto que abriu ↑";window.prompt("Copie o texto abaixo e cole no Gemini:",txt);restore();};
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,fail);} else {throw 0;} }
+    catch(e){
+      try{var ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();var d=document.execCommand("copy");document.body.removeChild(ta);d?ok():fail();}
+      catch(e2){fail();}
+    }
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest?e.target.closest(".askia"):null; if(!b)return;
+    e.preventDefault(); var q=b.closest(".q"); if(q)copy(buildPrompt(q),b);
+  });
+  if(document.readyState!=="loading")scan(); else document.addEventListener("DOMContentLoaded",function(){scan();});
+  try{
+    var mo=new MutationObserver(function(muts){muts.forEach(function(m){[].forEach.call(m.addedNodes,function(n){if(n.nodeType!==1)return;if(n.classList&&n.classList.contains("q"))inject(n);if(n.querySelectorAll)scan(n);});});});
+    mo.observe(document.documentElement||document.body,{childList:true,subtree:true});
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
